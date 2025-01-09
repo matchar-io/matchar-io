@@ -8,6 +8,7 @@ build = "build.rs"
 database = { path = "../database" }
 matchar_app_service = { path = "../matchar_app_service" }
 oauth2 = { path = "../oauth2" }
+refinement = { path = "../refinement" }
 
 [build-dependencies]
 anyhow = { workspace = true }

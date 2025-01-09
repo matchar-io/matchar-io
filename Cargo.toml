@@ -6,6 +6,7 @@ members = [
   "backend/matchar_app_backend",
   "backend/matchar_app_service",
   "backend/oauth2",
+  "backend/refinement",
 ]
 
 [workspace.dependencies]

@@ -9,12 +9,12 @@ pub struct Error(anyhow::Error);
 pub async fn handler(Extension(pool): Extension<ConnectionPool>) -> Result<String, Error> {
     let adapter = Adapter::new(pool);
     let service = Service::new(adapter);
-    let Data { token } = service
+    let Data { session_token } = service
         .execute()
         .await
         .map_err(|error| Error(error.into()))?;
 
-    Ok(token.0)
+    Ok(session_token.0)
 }
 
 impl IntoResponse for Error {
