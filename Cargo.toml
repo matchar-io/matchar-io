@@ -1,6 +1,7 @@
 [workspace]
 resolver = "2"
 members = [
+  "backend/database",
   "backend/matchar_app_adapter",
   "backend/matchar_app_backend",
   "backend/matchar_app_service",
@@ -9,5 +10,7 @@ members = [
 [workspace.dependencies]
 anyhow = "1.0.95"
 axum = { version = "0.8.1", features = ["tokio", "json", "query"] }
+serde = { version = "1.0.217", features = ["derive"] }
+sqlx = { version = "0.8.3", features = ["runtime-tokio", "macros", "postgres"] }
 thiserror = "2.0.10"
 tokio = { version = "1.43.0", features = ["full"] }

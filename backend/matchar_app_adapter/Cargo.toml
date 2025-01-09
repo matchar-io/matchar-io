@@ -4,4 +4,6 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+database = { path = "../database" }
 matchar_app_service = { path = "../matchar_app_service" }
+oauth2 = "4.4.2"
