@@ -1,0 +1,7 @@
+[package]
+name = "matchar_app_adapter"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+matchar_app_service = { path = "../matchar_app_service" }
