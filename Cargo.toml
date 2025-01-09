@@ -5,11 +5,13 @@ members = [
   "backend/matchar_app_adapter",
   "backend/matchar_app_backend",
   "backend/matchar_app_service",
+  "backend/oauth2",
 ]
 
 [workspace.dependencies]
 anyhow = "1.0.95"
 axum = { version = "0.8.1", features = ["tokio", "json", "query"] }
+reqwest = { version = "0.12.12", features = ["json"] }
 serde = { version = "1.0.217", features = ["derive"] }
 sqlx = { version = "0.8.3", features = ["runtime-tokio", "macros", "postgres"] }
 thiserror = "2.0.10"

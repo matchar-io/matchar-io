@@ -1,0 +1,10 @@
+[package]
+name = "oauth2"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+oauth2 = "4.4.2"
+reqwest = { workspace = true }
+serde = { workspace = true }
+thiserror = { workspace = true }

@@ -2,8 +2,12 @@
 name = "matchar_app_adapter"
 version = "0.1.0"
 edition = "2021"
+build = "build.rs"
 
 [dependencies]
 database = { path = "../database" }
 matchar_app_service = { path = "../matchar_app_service" }
-oauth2 = "4.4.2"
+oauth2 = { path = "../oauth2" }
+
+[build-dependencies]
+anyhow = { workspace = true }

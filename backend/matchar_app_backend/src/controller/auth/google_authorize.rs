@@ -7,10 +7,7 @@ pub struct Error(anyhow::Error);
 pub async fn handler() -> Result<String, Error> {
     let adapter = Adapter::new();
     let service = Service::new(adapter);
-    let Data {
-        redirect_url,
-        code_verifier,
-    } = service
+    let Data { redirect_url } = service
         .execute()
         .await
         .map_err(|error| Error(error.into()))?;
