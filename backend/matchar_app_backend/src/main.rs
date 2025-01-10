@@ -3,8 +3,10 @@ extern crate serde;
 
 mod app;
 mod controller;
+mod domain;
 mod shared;
 
+use domain::*;
 use shared::*;
 
 #[tokio::main]
