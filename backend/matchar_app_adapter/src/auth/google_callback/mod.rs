@@ -58,10 +58,6 @@ where
         std::todo!();
     }
 
-    fn session_token(&self, session_id: SessionId) -> SessionToken {
-        std::todo!();
-    }
-
     async fn logged_in_event(&self, user_id: UserId) -> Result<(), Error> {
         std::todo!();
     }

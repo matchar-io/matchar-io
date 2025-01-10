@@ -23,8 +23,6 @@ pub trait Repository {
         image_url: String,
     ) -> Result<SessionId, Error>;
 
-    fn session_token(&self, session_id: SessionId) -> SessionToken;
-
     async fn logged_in_event(&self, user_id: UserId) -> Result<(), Error>;
 }
 
@@ -33,7 +31,7 @@ pub struct Service<R: Repository> {
 }
 
 pub struct Data {
-    pub session_token: SessionToken,
+    pub session_id: SessionId,
 }
 
 pub struct PkceEntity {
@@ -103,10 +101,9 @@ where
             .repository
             .new_session(user.user_id, user.name, user.image_url)
             .await?;
-        let session_token = self.repository.session_token(session_id);
 
         self.repository.logged_in_event(user.user_id).await?;
 
-        Ok(Data { session_token })
+        Ok(Data { session_id })
     }
 }

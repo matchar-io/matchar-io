@@ -7,26 +7,38 @@ use axum_extra::extract::{
     cookie::{Cookie, SameSite},
     CookieJar,
 };
+use jsonwebtoken::{Algorithm, DecodingKey, EncodingKey, Header, TokenData, Validation};
+use refinement::SessionId;
+use time::{Duration, OffsetDateTime, UtcOffset};
 
 pub struct SessionToken {
-    value: String,
+    session_id: SessionId,
+    expired_at: OffsetDateTime,
 }
 
 pub enum SessionTokenError {
     NoCookies,
     NoCookie,
-    Expired,
+    Invalid,
+    InvalidSessionId,
+    InvalidTimestamp,
+    Encoding,
+}
+
+#[derive(Serialize, Deserialize)]
+struct Claim {
+    session_id: String,
+    exp: usize,
 }
 
 impl SessionToken {
-    const KEY: &'static str = "matchar_session_token";
+    const KEY: &'static str = "matchar::session_token";
+    const EXPIRING_DAYS: Duration = Duration::days(30);
 
-    pub fn new<S>(value: S) -> Self
-    where
-        S: Into<String>,
-    {
+    pub fn new(session_id: SessionId) -> Self {
         Self {
-            value: value.into(),
+            session_id,
+            expired_at: OffsetDateTime::now_utc() + Self::EXPIRING_DAYS,
         }
     }
 }
@@ -34,19 +46,46 @@ impl SessionToken {
 impl std::str::FromStr for SessionToken {
     type Err = SessionTokenError;
 
-    fn from_str(source: &str) -> Result<Self, Self::Err> {
-        // TODO: JWT 검증 추가.
-        Ok(Self::new(source))
+    fn from_str(token: &str) -> Result<Self, Self::Err> {
+        let decoding_key = DecodingKey::from_secret(crate::SESSION_SECRET.as_bytes());
+        let validation = Validation::default();
+        let TokenData { claims, .. } =
+            jsonwebtoken::decode::<Claim>(token, &decoding_key, &validation)
+                .map_err(|_| SessionTokenError::Invalid)?;
+        let session_id = claims
+            .session_id
+            .parse()
+            .map_err(|_| SessionTokenError::InvalidSessionId)?;
+        let expired_at = OffsetDateTime::from_unix_timestamp(claims.exp as i64)
+            .map_err(|_| SessionTokenError::InvalidTimestamp)?;
+
+        Ok(Self {
+            session_id,
+            expired_at,
+        })
     }
 }
 
 impl IntoResponse for SessionToken {
     fn into_response(self) -> axum::http::Response<axum::body::Body> {
-        let cookie = Cookie::build((Self::KEY, self.value))
+        let token = {
+            let header = Header::new(Algorithm::HS256);
+            let claim = Claim {
+                session_id: self.session_id.to_string(),
+                exp: self.expired_at.to_offset(UtcOffset::UTC).unix_timestamp() as usize,
+            };
+            let encoding_key = EncodingKey::from_secret(crate::SESSION_SECRET.as_bytes());
+
+            match jsonwebtoken::encode(&header, &claim, &encoding_key) {
+                Ok(token) => token,
+                Err(error) => return SessionTokenError::Encoding.into_response(),
+            }
+        };
+        let cookie = Cookie::build((Self::KEY, token))
             .http_only(true)
             .secure(true)
             .same_site(SameSite::Strict)
-            .max_age(time::Duration::days(365))
+            .max_age(Self::EXPIRING_DAYS)
             .path("/")
             .domain(crate::DOMAIN)
             .build();
@@ -78,8 +117,11 @@ where
 impl IntoResponse for SessionTokenError {
     fn into_response(self) -> axum::http::Response<axum::body::Body> {
         match self {
-            Self::NoCookies | Self::NoCookie | Self::Expired => {
+            Self::NoCookies | Self::NoCookie | Self::Invalid | Self::InvalidSessionId => {
                 StatusCode::UNAUTHORIZED.into_response()
+            }
+            Self::InvalidTimestamp | Self::Encoding => {
+                StatusCode::INTERNAL_SERVER_ERROR.into_response()
             }
         }
     }

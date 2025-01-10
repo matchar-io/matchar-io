@@ -9,8 +9,10 @@ anyhow = { workspace = true }
 axum = { workspace = true }
 axum-extra = { workspace = true }
 database = { path = "../database" }
+jsonwebtoken = { workspace = true }
 matchar_app_adapter = { path = "../matchar_app_adapter" }
 matchar_app_service = { path = "../matchar_app_service" }
+refinement = { path = "../refinement" }
 serde = { workspace = true }
 thiserror = { workspace = true }
 time = { workspace = true }
