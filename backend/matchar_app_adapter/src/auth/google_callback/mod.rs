@@ -2,7 +2,7 @@ use database::DatabaseDriver;
 use matchar_app_service::auth::google_callback::{
     AccessToken, Error, Repository, SessionToken, UserEntity, UserInfo, UserToken,
 };
-use refinement::EmailAddress;
+use refinement::{EmailAddress, SessionId, UserId};
 
 pub struct Adapter<D: DatabaseDriver> {
     driver: D,
@@ -21,27 +21,29 @@ impl<D> Repository for Adapter<D>
 where
     D: DatabaseDriver,
 {
-    async fn verify_code(
+    async fn find_pkce_by_code(
         &self,
-        code: String,
-        code_verifier: String,
-        csrf_token: String,
-    ) -> Result<AccessToken, Error> {
+        code: &str,
+    ) -> Result<matchar_app_service::auth::google_callback::PkceEntity, Error> {
         std::todo!();
     }
 
-    async fn user_info_in_google(&self, access_token: AccessToken) -> Result<UserInfo, Error> {
+    async fn verify_code(&self, code: &str, csrf_token: &str) -> Result<AccessToken, Error> {
         std::todo!();
     }
 
-    async fn find_user(&self, sub: String) -> Result<Option<UserEntity>, Error> {
+    async fn user_info_in_google(&self, access_token: &AccessToken) -> Result<UserInfo, Error> {
+        std::todo!();
+    }
+
+    async fn find_user_by_oauth_sub(&self, sub: &str) -> Result<Option<UserEntity>, Error> {
         std::todo!();
     }
 
     async fn new_user(
         &self,
         email_address: EmailAddress,
-        name: String,
+        name: Option<String>,
         image_url: Option<String>,
     ) -> Result<UserEntity, Error> {
         std::todo!();
@@ -49,7 +51,7 @@ where
 
     async fn new_session(
         &self,
-        user_id: String,
+        user_id: UserId,
         name: String,
         image_url: String,
     ) -> Result<SessionId, Error> {

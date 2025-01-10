@@ -1,3 +1,6 @@
+#[macro_use]
+extern crate serde;
+
 mod app;
 mod controller;
 mod shared;

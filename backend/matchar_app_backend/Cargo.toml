@@ -7,10 +7,13 @@ build = "build.rs"
 [dependencies]
 anyhow = { workspace = true }
 axum = { workspace = true }
+axum-extra = { workspace = true }
 database = { path = "../database" }
 matchar_app_adapter = { path = "../matchar_app_adapter" }
 matchar_app_service = { path = "../matchar_app_service" }
+serde = { workspace = true }
 thiserror = { workspace = true }
+time = { workspace = true }
 tokio = { workspace = true }
 
 [build-dependencies]

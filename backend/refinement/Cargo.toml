@@ -6,3 +6,5 @@ edition = "2021"
 [dependencies]
 email_address = "0.2.9"
 serde = { workspace = true }
+thiserror = { workspace = true }
+uuid = { version = "1.11.0", features = ["v7"] }

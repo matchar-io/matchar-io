@@ -1,26 +1,18 @@
-use refinement::EmailAddress;
-
-// TODO: refinement 내에 Id 타입을 정의하고 사용하도록 수정.
-pub type UserId = String;
-
-pub type SessionId = String;
+use refinement::{EmailAddress, SessionId, UserId};
 
 pub trait Repository {
-    async fn verify_code(
-        &self,
-        code: String,
-        code_verifier: String,
-        csrf_token: String,
-    ) -> Result<AccessToken, Error>;
+    async fn find_pkce_by_code(&self, code: &str) -> Result<PkceEntity, Error>;
 
-    async fn user_info_in_google(&self, access_token: AccessToken) -> Result<UserInfo, Error>;
+    async fn verify_code(&self, code: &str, code_verifier: &str) -> Result<AccessToken, Error>;
 
-    async fn find_user(&self, sub: String) -> Result<Option<UserEntity>, Error>;
+    async fn user_info_in_google(&self, access_token: &AccessToken) -> Result<UserInfo, Error>;
+
+    async fn find_user_by_oauth_sub(&self, sub: &str) -> Result<Option<UserEntity>, Error>;
 
     async fn new_user(
         &self,
         email_address: EmailAddress,
-        name: String,
+        name: Option<String>,
         image_url: Option<String>,
     ) -> Result<UserEntity, Error>;
 
@@ -42,6 +34,11 @@ pub struct Service<R: Repository> {
 
 pub struct Data {
     pub session_token: SessionToken,
+}
+
+pub struct PkceEntity {
+    pub code_verifier: String,
+    pub csrf_token: String,
 }
 
 pub struct AccessToken(pub String);
@@ -78,39 +75,37 @@ where
         Self { repository }
     }
 
-    pub async fn execute(
-        &self,
-        code: String,
-        code_verifier: String,
-        csrf_token: String,
-    ) -> Result<Data, Error> {
-        let access_token = self
+    pub async fn execute(&self, code: String, csrf_token: String) -> Result<Data, Error> {
+        let PkceEntity {
+            code_verifier,
+            csrf_token: stored_csrf_token,
+        } = self.repository.find_pkce_by_code(&code).await?;
+        if csrf_token != stored_csrf_token {
+            return Err(Error::InvalidCsrfToken);
+        }
+
+        let access_token = self.repository.verify_code(&code, &code_verifier).await?;
+        let user_info = self.repository.user_info_in_google(&access_token).await?;
+        let user = match self
             .repository
-            .verify_code(code, code_verifier, csrf_token)
-            .await?;
-        let user_info = self.repository.user_info_in_google(access_token).await?;
-        let user = match self.repository.find_user(user_info.sub).await? {
+            .find_user_by_oauth_sub(&user_info.sub)
+            .await?
+        {
             Some(user) => user,
             None => {
                 self.repository
-                    .new_user(
-                        user_info.email_address.clone(),
-                        user_info.name.clone().unwrap_or_default(),
-                        user_info.image_url.clone(),
-                    )
+                    .new_user(user_info.email_address, user_info.name, user_info.image_url)
                     .await?
             }
         };
 
         let session_id = self
             .repository
-            .new_session(user.user_id.clone(), user.name, user.image_url)
+            .new_session(user.user_id, user.name, user.image_url)
             .await?;
         let session_token = self.repository.session_token(session_id);
 
-        self.repository
-            .logged_in_event(user.user_id.clone())
-            .await?;
+        self.repository.logged_in_event(user.user_id).await?;
 
         Ok(Data { session_token })
     }
