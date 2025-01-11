@@ -4,7 +4,7 @@ pub trait DatabaseDriver {
 
     type Transaction;
 
-    type Error: std::error::Error;
+    type Error: std::error::Error + Send + Sync;
 
     async fn connect(&self) -> Result<Self::Connection, Self::Error>;
 
@@ -23,6 +23,14 @@ impl ConnectionPool {
         let pool = sqlx::PgPool::connect(url).await?;
 
         Ok(Self(pool))
+    }
+}
+
+impl std::ops::Deref for ConnectionPool {
+    type Target = sqlx::PgPool;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
     }
 }
 

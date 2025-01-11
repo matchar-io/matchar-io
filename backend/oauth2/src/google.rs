@@ -130,3 +130,18 @@ impl GoogleOauth2 {
         })
     }
 }
+
+#[test]
+fn google_pkce_len() -> anyhow::Result<()> {
+    let pkce = GoogleOauth2::new(
+        "client_id",
+        "client_secret",
+        "http://localhost:8080/auth/google/callback",
+    )?
+    .start();
+
+    assert_eq!(pkce.csrf_token.len(), 22);
+    assert_eq!(pkce.code_verifier.len(), 43);
+
+    Ok(())
+}

@@ -1,9 +1,16 @@
 use refinement::{EmailAddress, SessionId, UserId};
 
 pub trait Repository {
-    async fn find_pkce_by_code(&self, code: &str) -> Result<PkceEntity, Error>;
+    async fn find_pkce_by_csrf_token(
+        &self,
+        csrf_token: &CsrfToken,
+    ) -> Result<Option<PkceEntity>, Error>;
 
-    async fn verify_code(&self, code: &str, code_verifier: &str) -> Result<AccessToken, Error>;
+    async fn verify_code(
+        &self,
+        code: &Code,
+        code_verifier: &CodeVerifier,
+    ) -> Result<AccessToken, Error>;
 
     async fn user_info_in_google(&self, access_token: &AccessToken) -> Result<UserInfo, Error>;
 
@@ -34,9 +41,15 @@ pub struct Data {
     pub session_id: SessionId,
 }
 
+pub struct CsrfToken(String);
+
+pub struct Code(String);
+
+pub struct CodeVerifier(String);
+
 pub struct PkceEntity {
-    pub code_verifier: String,
-    pub csrf_token: String,
+    pub code_verifier: CodeVerifier,
+    pub expired_at: time::OffsetDateTime,
 }
 
 pub struct AccessToken(pub String);
@@ -61,8 +74,10 @@ pub struct UserToken(pub String);
 
 #[derive(Debug, Error)]
 pub enum Error {
+    #[error("No matched")]
+    NoMatched,
     #[error("Invalid CSRF token")]
-    InvalidCsrfToken,
+    Expired,
 }
 
 impl<R> Service<R>
@@ -74,12 +89,17 @@ where
     }
 
     pub async fn execute(&self, code: String, csrf_token: String) -> Result<Data, Error> {
+        let code = Code(code);
+        let csrf_token = CsrfToken(csrf_token);
         let PkceEntity {
             code_verifier,
-            csrf_token: stored_csrf_token,
-        } = self.repository.find_pkce_by_code(&code).await?;
-        if csrf_token != stored_csrf_token {
-            return Err(Error::InvalidCsrfToken);
+            expired_at,
+        } = match self.repository.find_pkce_by_csrf_token(&csrf_token).await? {
+            Some(pkce) => pkce,
+            None => return Err(Error::NoMatched),
+        };
+        if expired_at < time::OffsetDateTime::now_utc() {
+            return Err(Error::Expired);
         }
 
         let access_token = self.repository.verify_code(&code, &code_verifier).await?;
@@ -105,5 +125,26 @@ where
         self.repository.logged_in_event(user.user_id).await?;
 
         Ok(Data { session_id })
+    }
+}
+
+impl CsrfToken {
+    #[inline]
+    pub fn as_str(&self) -> &str {
+        &self.0
+    }
+}
+
+impl Code {
+    #[inline]
+    pub fn as_str(&self) -> &str {
+        &self.0
+    }
+}
+
+impl CodeVerifier {
+    #[inline]
+    pub fn as_str(&self) -> &str {
+        &self.0
     }
 }

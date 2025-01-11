@@ -2,3 +2,5 @@
 .env.keys
 shared
 !shared/mod.rs
+
+.sqlx/

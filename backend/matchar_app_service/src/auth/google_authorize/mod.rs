@@ -1,10 +1,10 @@
-pub trait Repository {
+pub trait Repository: Sync + Send {
     fn new_pkce(&self) -> Result<Pkce, Error>;
 
-    async fn pkce_session(
+    async fn new_pkce_session(
         &self,
-        csrf_token: CsrfToken,
-        code_verifier: CodeVerifier,
+        csrf_token: &CsrfToken,
+        code_verifier: &CodeVerifier,
     ) -> Result<(), Error>;
 }
 
@@ -24,9 +24,9 @@ pub struct Data {
 
 pub struct RedirectUrl(pub String);
 
-pub struct CsrfToken(pub String);
+pub struct CsrfToken(String);
 
-pub struct CodeVerifier(pub String);
+pub struct CodeVerifier(String);
 
 #[derive(Debug, Error)]
 pub enum Error {
@@ -49,10 +49,34 @@ where
             code_verifier,
         } = self.repository.new_pkce()?;
         self.repository
-            .pkce_session(csrf_token, code_verifier)
+            .new_pkce_session(&csrf_token, &code_verifier)
             .await
             .map_err(|error| Error::Pkce(error.into()))?;
 
         Ok(Data { redirect_url })
+    }
+}
+
+impl Pkce {
+    pub const fn new(redirect_url: String, csrf_token: String, code_verifier: String) -> Self {
+        Self {
+            redirect_url: RedirectUrl(redirect_url),
+            csrf_token: CsrfToken(csrf_token),
+            code_verifier: CodeVerifier(code_verifier),
+        }
+    }
+}
+
+impl CsrfToken {
+    #[inline]
+    pub fn as_str(&self) -> &str {
+        &self.0
+    }
+}
+
+impl CodeVerifier {
+    #[inline]
+    pub fn as_str(&self) -> &str {
+        &self.0
     }
 }

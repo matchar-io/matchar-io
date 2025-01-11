@@ -13,6 +13,14 @@ macro_rules! new_id {
         }
 
         impl Id {
+            pub const fn as_uuid(&self) -> uuid::Uuid {
+                match self {
+                    $(
+                        Id::$name(id) => id.as_uuid(),
+                    )+
+                }
+            }
+
             pub const fn as_u128(&self) -> u128 {
                 match self {
                     $(
@@ -83,8 +91,13 @@ macro_rules! new_id {
             pub struct $name(uuid::Uuid);
 
             impl $name {
-                pub fn generate() -> Self {
+                pub fn random() -> Self {
                     Self(uuid::Uuid::now_v7())
+                }
+
+                #[inline]
+                pub const fn as_uuid(&self) -> uuid::Uuid {
+                    self.0
                 }
 
                 #[inline]
@@ -136,7 +149,7 @@ macro_rules! new_id {
 }
 
 new_id! {
-    Pkce -> "pkce_",
+    PkceId -> "pkce_",
     UserId -> "user_",
     SessionId -> "session_",
 }

@@ -1172,6 +1172,8 @@ dependencies = [
  "matchar_app_service",
  "oauth2 0.1.0",
  "refinement",
+ "sqlx",
+ "time",
 ]
 
 [[package]]
@@ -1187,7 +1189,7 @@ dependencies = [
  "matchar_app_service",
  "refinement",
  "serde",
- "thiserror 2.0.10",
+ "thiserror 2.0.11",
  "time",
  "tokio",
 ]
@@ -1198,7 +1200,8 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "refinement",
- "thiserror 2.0.10",
+ "thiserror 2.0.11",
+ "time",
 ]
 
 [[package]]
@@ -1333,10 +1336,11 @@ dependencies = [
 name = "oauth2"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "oauth2 4.4.2",
  "reqwest 0.12.12",
  "serde",
- "thiserror 2.0.10",
+ "thiserror 2.0.11",
 ]
 
 [[package]]
@@ -1589,7 +1593,7 @@ version = "0.1.0"
 dependencies = [
  "email_address",
  "serde",
- "thiserror 2.0.10",
+ "thiserror 2.0.11",
  "uuid",
 ]
 
@@ -2061,11 +2065,13 @@ dependencies = [
  "serde_json",
  "sha2",
  "smallvec",
- "thiserror 2.0.10",
+ "thiserror 2.0.11",
+ "time",
  "tokio",
  "tokio-stream",
  "tracing",
  "url",
+ "uuid",
 ]
 
 [[package]]
@@ -2144,8 +2150,10 @@ dependencies = [
  "smallvec",
  "sqlx-core",
  "stringprep",
- "thiserror 2.0.10",
+ "thiserror 2.0.11",
+ "time",
  "tracing",
+ "uuid",
  "whoami",
 ]
 
@@ -2181,8 +2189,10 @@ dependencies = [
  "smallvec",
  "sqlx-core",
  "stringprep",
- "thiserror 2.0.10",
+ "thiserror 2.0.11",
+ "time",
  "tracing",
+ "uuid",
  "whoami",
 ]
 
@@ -2205,8 +2215,10 @@ dependencies = [
  "serde",
  "serde_urlencoded",
  "sqlx-core",
+ "time",
  "tracing",
  "url",
+ "uuid",
 ]
 
 [[package]]
@@ -2336,11 +2348,11 @@ dependencies = [
 
 [[package]]
 name = "thiserror"
-version = "2.0.10"
+version = "2.0.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a3ac7f54ca534db81081ef1c1e7f6ea8a3ef428d2fc069097c079443d24124d3"
+checksum = "d452f284b73e6d76dd36758a0c8684b1d5be31f92b89d07fd5822175732206fc"
 dependencies = [
- "thiserror-impl 2.0.10",
+ "thiserror-impl 2.0.11",
 ]
 
 [[package]]
@@ -2356,9 +2368,9 @@ dependencies = [
 
 [[package]]
 name = "thiserror-impl"
-version = "2.0.10"
+version = "2.0.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9e9465d30713b56a37ede7185763c3492a91be2f5fa68d958c44e41ab9248beb"
+checksum = "26afc1baea8a989337eeb52b6e72a039780ce45c3edfcc9c5b9d112feeb173c2"
 dependencies = [
  "proc-macro2",
  "quote",

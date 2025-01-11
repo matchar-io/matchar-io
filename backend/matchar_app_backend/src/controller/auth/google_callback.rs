@@ -17,8 +17,7 @@ pub async fn handler(
     Query(parameter): Query<Parameter>,
 ) -> Result<crate::SessionToken, (StatusCode, String)> {
     let adapter = Adapter::new(pool);
-    let service = Service::new(adapter);
-    let Data { session_id } = service
+    let Data { session_id } = Service::new(adapter)
         .execute(parameter.code, parameter.state)
         .await
         .map_err(|error| (StatusCode::INTERNAL_SERVER_ERROR, format!("{:?}", error)))?;

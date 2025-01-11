@@ -1,34 +1,32 @@
-use database::DatabaseDriver;
+use database::{ConnectionPool, DatabaseDriver};
 use matchar_app_service::auth::google_callback::{
-    AccessToken, Error, Repository, SessionToken, UserEntity, UserInfo, UserToken,
+    AccessToken, Code, CodeVerifier, CsrfToken, Error, PkceEntity, Repository, UserEntity, UserInfo,
 };
 use refinement::{EmailAddress, SessionId, UserId};
 
-pub struct Adapter<D: DatabaseDriver> {
-    driver: D,
+pub struct Adapter {
+    pool: ConnectionPool,
 }
 
-impl<D> Adapter<D>
-where
-    D: DatabaseDriver,
-{
-    pub const fn new(driver: D) -> Self {
-        Self { driver }
+impl Adapter {
+    pub const fn new(pool: ConnectionPool) -> Self {
+        Self { pool }
     }
 }
 
-impl<D> Repository for Adapter<D>
-where
-    D: DatabaseDriver,
-{
-    async fn find_pkce_by_code(
+impl Repository for Adapter {
+    async fn find_pkce_by_csrf_token(
         &self,
-        code: &str,
-    ) -> Result<matchar_app_service::auth::google_callback::PkceEntity, Error> {
+        csrf_token: &CsrfToken,
+    ) -> Result<Option<PkceEntity>, Error> {
         std::todo!();
     }
 
-    async fn verify_code(&self, code: &str, csrf_token: &str) -> Result<AccessToken, Error> {
+    async fn verify_code(
+        &self,
+        code: &Code,
+        code_verifier: &CodeVerifier,
+    ) -> Result<AccessToken, Error> {
         std::todo!();
     }
 

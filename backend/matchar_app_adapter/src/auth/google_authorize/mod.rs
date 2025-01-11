@@ -1,13 +1,17 @@
+use database::ConnectionPool;
 use matchar_app_service::auth::google_authorize::{
     CodeVerifier, CsrfToken, Error, Pkce, RedirectUrl, Repository,
 };
 use oauth2::GoogleOauth2;
+use refinement::PkceId;
 
-pub struct Adapter(());
+pub struct Adapter {
+    pool: ConnectionPool,
+}
 
 impl Adapter {
-    pub const fn new() -> Self {
-        Self(())
+    pub fn new(pool: ConnectionPool) -> Self {
+        Self { pool }
     }
 }
 
@@ -21,18 +25,36 @@ impl Repository for Adapter {
         .map_err(|error| Error::Pkce(error.into()))?
         .start();
 
-        Ok(Pkce {
-            redirect_url: RedirectUrl(pkce.authorize_url),
-            csrf_token: CsrfToken(pkce.csrf_token),
-            code_verifier: CodeVerifier(pkce.code_verifier),
-        })
+        Ok(Pkce::new(
+            pkce.authorize_url,
+            pkce.csrf_token,
+            pkce.code_verifier,
+        ))
     }
 
-    async fn pkce_session(
+    async fn new_pkce_session(
         &self,
-        csrf_token: CsrfToken,
-        code_verifier: CodeVerifier,
+        csrf_token: &CsrfToken,
+        code_verifier: &CodeVerifier,
     ) -> Result<(), Error> {
-        std::todo!();
+        let pkce_id = PkceId::random();
+        let expired_at = time::OffsetDateTime::now_utc() + time::Duration::minutes(10);
+        let expired_at = time::PrimitiveDateTime::new(expired_at.date(), expired_at.time());
+
+        sqlx::query!(
+            r#"
+            INSERT INTO "pkce" ("pkce_id", "csrf_token", "code_verifier", "expired_at")
+            VALUES ($1, $2, $3, $4)
+            "#,
+            pkce_id.as_uuid(),
+            csrf_token.as_str(),
+            code_verifier.as_str(),
+            expired_at,
+        )
+        .execute(&*self.pool)
+        .await
+        .map_err(|error| Error::Pkce(error.into()))?;
+
+        Ok(())
     }
 }
