@@ -22,7 +22,7 @@ pub struct Data {
     pub redirect_url: RedirectUrl,
 }
 
-pub struct RedirectUrl(pub String);
+pub struct RedirectUrl(String);
 
 pub struct CsrfToken(String);
 
@@ -75,6 +75,13 @@ impl CsrfToken {
 }
 
 impl CodeVerifier {
+    #[inline]
+    pub fn as_str(&self) -> &str {
+        &self.0
+    }
+}
+
+impl RedirectUrl {
     #[inline]
     pub fn as_str(&self) -> &str {
         &self.0

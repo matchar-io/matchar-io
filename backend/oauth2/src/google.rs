@@ -26,8 +26,8 @@ pub enum Error {
     #[error("Invalid redirect URL")]
     InvalidRedirectUrl,
 
-    #[error("Failed to verify")]
-    VerificationFailed,
+    #[error("Failed to verify: {0}")]
+    VerificationFailed(anyhow::Error),
 
     #[error("Failed to get user info from response")]
     UserInfoResponse,
@@ -72,6 +72,11 @@ impl GoogleOauth2 {
             .client
             .authorize_url(oauth2::CsrfToken::new_random)
             .set_pkce_challenge(challenge)
+            .add_scopes(vec![
+                oauth2::Scope::new("email".to_owned()),
+                oauth2::Scope::new("profile".to_owned()),
+                oauth2::Scope::new("openid".to_owned()),
+            ])
             .url();
 
         Pkce {
@@ -93,7 +98,7 @@ impl GoogleOauth2 {
             .set_pkce_verifier(code_verifier)
             .request_async(oauth2::reqwest::async_http_client)
             .await
-            .map_err(|_| Error::VerificationFailed)?;
+            .map_err(|error| Error::VerificationFailed(error.into()))?;
         let access_token = AccessToken(response.access_token().secret().to_owned());
 
         Ok(access_token)

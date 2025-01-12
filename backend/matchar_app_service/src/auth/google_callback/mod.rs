@@ -1,4 +1,4 @@
-use refinement::{EmailAddress, ImageUrl, UserName, SessionId, UserId};
+use refinement::{EmailAddress, ImageUrl, PkceId, SessionId, UserId, UserName};
 
 pub trait Repository {
     type AccessToken;
@@ -10,6 +10,7 @@ pub trait Repository {
 
     async fn verify_code(
         &self,
+        pkce_id: PkceId,
         code: &Code,
         code_verifier: &CodeVerifier,
     ) -> Result<Self::AccessToken, Error>;
@@ -32,12 +33,7 @@ pub trait Repository {
         image_url: &Option<ImageUrl>,
     ) -> Result<UserEntity, Error>;
 
-    async fn new_session(
-        &self,
-        user_id: UserId,
-        name: &UserName,
-        image_url: &ImageUrl,
-    ) -> Result<SessionId, Error>;
+    async fn new_session(&self, user_id: UserId) -> Result<SessionId, Error>;
 
     async fn logged_in_event(&self, user_id: UserId) -> Result<(), Error>;
 }
@@ -48,6 +44,8 @@ pub struct Service<R: Repository> {
 
 pub struct Data {
     pub session_id: SessionId,
+    pub name: UserName,
+    pub image_url: ImageUrl,
 }
 
 pub struct CsrfToken(String);
@@ -57,6 +55,7 @@ pub struct Code(String);
 pub struct CodeVerifier(String);
 
 pub struct PkceEntity {
+    pub pkce_id: PkceId,
     pub code_verifier: CodeVerifier,
     pub expired_at: time::OffsetDateTime,
 }
@@ -111,6 +110,7 @@ where
         let csrf_token = CsrfToken(csrf_token);
 
         let PkceEntity {
+            pkce_id,
             code_verifier,
             expired_at,
         } = match self.repository.find_pkce_by_csrf_token(&csrf_token).await? {
@@ -121,7 +121,10 @@ where
             return Err(Error::Expired);
         }
 
-        let access_token = self.repository.verify_code(&code, &code_verifier).await?;
+        let access_token = self
+            .repository
+            .verify_code(pkce_id, &code, &code_verifier)
+            .await?;
         let user_info = self.repository.user_info_in_google(&access_token).await?;
         let user = match self
             .repository
@@ -141,14 +144,15 @@ where
             }
         };
 
-        let session_id = self
-            .repository
-            .new_session(user.user_id, &user.name, &user.image_url)
-            .await?;
+        let session_id = self.repository.new_session(user.user_id).await?;
 
         self.repository.logged_in_event(user.user_id).await?;
 
-        Ok(Data { session_id })
+        Ok(Data {
+            session_id,
+            name: user.name,
+            image_url: user.image_url,
+        })
     }
 }
 
@@ -185,8 +189,9 @@ impl GoogleSubject {
 }
 
 impl PkceEntity {
-    pub fn new(code_verifier: String, expired_at: time::OffsetDateTime) -> Self {
+    pub fn new(pkce_id: PkceId, code_verifier: String, expired_at: time::OffsetDateTime) -> Self {
         Self {
+            pkce_id,
             code_verifier: CodeVerifier(code_verifier.to_owned()),
             expired_at,
         }

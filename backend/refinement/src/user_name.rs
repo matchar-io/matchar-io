@@ -15,6 +15,7 @@ impl UserName {
         S: Into<String>,
     {
         let name = name.into();
+
         match name.len() {
             0 => Err(Error::Empty),
             1..=20 => Ok(Self(name)),
@@ -38,5 +39,12 @@ impl UserName {
     #[inline]
     pub fn as_str(&self) -> &str {
         &self.0
+    }
+}
+
+impl std::fmt::Display for UserName {
+    #[inline]
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
     }
 }
