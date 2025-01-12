@@ -95,6 +95,10 @@ macro_rules! new_id {
                     Self(uuid::Uuid::now_v7())
                 }
 
+                pub const fn new_unchecked(uuid: uuid::Uuid) -> Self {
+                    Self(uuid)
+                }
+
                 #[inline]
                 pub const fn as_uuid(&self) -> uuid::Uuid {
                     self.0
@@ -152,4 +156,11 @@ new_id! {
     PkceId -> "pkce_",
     UserId -> "user_",
     SessionId -> "session_",
+    IdentityProviderId -> "credential_",
+}
+
+impl IdentityProviderId {
+    pub const GOOGLE: Self = Self(uuid::Uuid::from_u128(
+        0x01945bc2_1786_7668_8b29_20f63e8c8e0f,
+    ));
 }

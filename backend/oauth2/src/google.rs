@@ -131,6 +131,13 @@ impl GoogleOauth2 {
     }
 }
 
+impl AccessToken {
+    #[inline]
+    pub fn as_str(&self) -> &str {
+        &self.0
+    }
+}
+
 #[test]
 fn google_pkce_len() -> anyhow::Result<()> {
     let pkce = GoogleOauth2::new(

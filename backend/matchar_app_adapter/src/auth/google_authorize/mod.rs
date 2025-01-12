@@ -1,6 +1,6 @@
 use database::ConnectionPool;
 use matchar_app_service::auth::google_authorize::{
-    CodeVerifier, CsrfToken, Error, Pkce, RedirectUrl, Repository,
+    CodeVerifier, CsrfToken, Error, Pkce, Repository,
 };
 use oauth2::GoogleOauth2;
 use refinement::PkceId;

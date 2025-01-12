@@ -78,7 +78,7 @@ impl IntoResponse for SessionToken {
 
             match jsonwebtoken::encode(&header, &claim, &encoding_key) {
                 Ok(token) => token,
-                Err(error) => return SessionTokenError::Encoding.into_response(),
+                Err(_) => return SessionTokenError::Encoding.into_response(),
             }
         };
         let cookie = Cookie::build((Self::KEY, token))

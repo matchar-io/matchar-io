@@ -9,14 +9,12 @@ pub struct Parameter {
     state: String,
 }
 
-#[derive(Debug)]
-pub struct Error(anyhow::Error);
-
 pub async fn handler(
     Extension(pool): Extension<ConnectionPool>,
     Query(parameter): Query<Parameter>,
 ) -> Result<crate::SessionToken, (StatusCode, String)> {
-    let adapter = Adapter::new(pool);
+    let adapter = Adapter::new(pool)
+        .map_err(|error| (StatusCode::INTERNAL_SERVER_ERROR, format!("{:?}", error)))?;
     let Data { session_id } = Service::new(adapter)
         .execute(parameter.code, parameter.state)
         .await

@@ -1,6 +1,8 @@
-use refinement::{EmailAddress, SessionId, UserId};
+use refinement::{EmailAddress, ImageUrl, UserName, SessionId, UserId};
 
 pub trait Repository {
+    type AccessToken;
+
     async fn find_pkce_by_csrf_token(
         &self,
         csrf_token: &CsrfToken,
@@ -10,24 +12,31 @@ pub trait Repository {
         &self,
         code: &Code,
         code_verifier: &CodeVerifier,
-    ) -> Result<AccessToken, Error>;
+    ) -> Result<Self::AccessToken, Error>;
 
-    async fn user_info_in_google(&self, access_token: &AccessToken) -> Result<UserInfo, Error>;
+    async fn user_info_in_google(
+        &self,
+        access_token: &Self::AccessToken,
+    ) -> Result<UserInfo, Error>;
 
-    async fn find_user_by_oauth_sub(&self, sub: &str) -> Result<Option<UserEntity>, Error>;
+    async fn find_user_by_oauth_sub(
+        &self,
+        sub: &GoogleSubject,
+    ) -> Result<Option<UserEntity>, Error>;
 
     async fn new_user(
         &self,
-        email_address: EmailAddress,
-        name: Option<String>,
-        image_url: Option<String>,
+        sub: &GoogleSubject,
+        email_address: &EmailAddress,
+        name: &Option<UserName>,
+        image_url: &Option<ImageUrl>,
     ) -> Result<UserEntity, Error>;
 
     async fn new_session(
         &self,
         user_id: UserId,
-        name: String,
-        image_url: String,
+        name: &UserName,
+        image_url: &ImageUrl,
     ) -> Result<SessionId, Error>;
 
     async fn logged_in_event(&self, user_id: UserId) -> Result<(), Error>;
@@ -52,20 +61,20 @@ pub struct PkceEntity {
     pub expired_at: time::OffsetDateTime,
 }
 
-pub struct AccessToken(pub String);
-
 pub struct UserInfo {
-    pub sub: String,
+    pub sub: GoogleSubject,
     pub email_address: EmailAddress,
-    pub name: Option<String>,
-    pub image_url: Option<String>,
+    pub name: Option<UserName>,
+    pub image_url: Option<ImageUrl>,
 }
+
+pub struct GoogleSubject(String);
 
 pub struct UserEntity {
     pub user_id: UserId,
     pub email_address: EmailAddress,
-    pub name: String,
-    pub image_url: String,
+    pub name: UserName,
+    pub image_url: ImageUrl,
 }
 
 pub struct SessionToken(pub String);
@@ -76,8 +85,17 @@ pub struct UserToken(pub String);
 pub enum Error {
     #[error("No matched")]
     NoMatched,
-    #[error("Invalid CSRF token")]
+    #[error("Expired")]
     Expired,
+    #[error("Verify error: {0}")]
+    Verify(anyhow::Error),
+
+    #[error("User info error: {0}")]
+    Google(anyhow::Error),
+    #[error("Oauth2 error: {0}")]
+    Oauth2(anyhow::Error),
+    #[error("Database error: {0}")]
+    Database(anyhow::Error),
 }
 
 impl<R> Service<R>
@@ -91,6 +109,7 @@ where
     pub async fn execute(&self, code: String, csrf_token: String) -> Result<Data, Error> {
         let code = Code(code);
         let csrf_token = CsrfToken(csrf_token);
+
         let PkceEntity {
             code_verifier,
             expired_at,
@@ -112,14 +131,19 @@ where
             Some(user) => user,
             None => {
                 self.repository
-                    .new_user(user_info.email_address, user_info.name, user_info.image_url)
+                    .new_user(
+                        &user_info.sub,
+                        &user_info.email_address,
+                        &user_info.name,
+                        &user_info.image_url,
+                    )
                     .await?
             }
         };
 
         let session_id = self
             .repository
-            .new_session(user.user_id, user.name, user.image_url)
+            .new_session(user.user_id, &user.name, &user.image_url)
             .await?;
 
         self.repository.logged_in_event(user.user_id).await?;
@@ -146,5 +170,25 @@ impl CodeVerifier {
     #[inline]
     pub fn as_str(&self) -> &str {
         &self.0
+    }
+}
+
+impl GoogleSubject {
+    pub const fn new(sub: String) -> Self {
+        Self(sub)
+    }
+
+    #[inline]
+    pub fn as_str(&self) -> &str {
+        &self.0
+    }
+}
+
+impl PkceEntity {
+    pub fn new(code_verifier: String, expired_at: time::OffsetDateTime) -> Self {
+        Self {
+            code_verifier: CodeVerifier(code_verifier.to_owned()),
+            expired_at,
+        }
     }
 }

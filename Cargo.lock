@@ -1172,6 +1172,8 @@ dependencies = [
  "matchar_app_service",
  "oauth2 0.1.0",
  "refinement",
+ "reqwest 0.12.12",
+ "serde",
  "sqlx",
  "time",
 ]
@@ -1591,9 +1593,12 @@ dependencies = [
 name = "refinement"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "email_address",
  "serde",
  "thiserror 2.0.11",
+ "time",
+ "url",
  "uuid",
 ]
 

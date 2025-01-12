@@ -2,9 +2,15 @@
 name = "refinement"
 version = "0.1.0"
 edition = "2021"
+build = "build.rs"
 
 [dependencies]
 email_address = "0.2.9"
 serde = { workspace = true }
 thiserror = { workspace = true }
+time = { workspace = true }
+url = { version = "2.5.4", features = ["serde"] }
 uuid = { version = "1.11.0", features = ["v7"] }
+
+[build-dependencies]
+anyhow = { workspace = true }

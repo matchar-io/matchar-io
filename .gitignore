@@ -1,6 +1,4 @@
-/target
-.env.keys
-shared
-!shared/mod.rs
-
 .sqlx/
+target/
+.env.keys
+shared/

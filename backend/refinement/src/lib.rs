@@ -6,6 +6,14 @@ extern crate thiserror;
 
 pub mod email_address;
 pub mod id;
+pub mod url;
+pub mod user_name;
+
+mod shared;
 
 pub use email_address::*;
 pub use id::*;
+pub use url::*;
+pub use user_name::*;
+
+use shared::*;
