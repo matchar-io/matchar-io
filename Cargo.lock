@@ -1176,6 +1176,7 @@ dependencies = [
  "serde",
  "sqlx",
  "time",
+ "url",
 ]
 
 [[package]]
@@ -1194,6 +1195,7 @@ dependencies = [
  "thiserror 2.0.11",
  "time",
  "tokio",
+ "url",
 ]
 
 [[package]]
@@ -1204,6 +1206,7 @@ dependencies = [
  "refinement",
  "thiserror 2.0.11",
  "time",
+ "url",
 ]
 
 [[package]]

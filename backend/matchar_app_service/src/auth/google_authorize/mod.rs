@@ -5,6 +5,7 @@ pub trait Repository: Sync + Send {
         &self,
         csrf_token: &CsrfToken,
         code_verifier: &CodeVerifier,
+        from_url: url::Url,
     ) -> Result<(), Error>;
 }
 
@@ -42,14 +43,14 @@ where
         Self { repository }
     }
 
-    pub async fn execute(&self) -> Result<Data, Error> {
+    pub async fn execute(&self, from_url: url::Url) -> Result<Data, Error> {
         let Pkce {
             redirect_url,
             csrf_token,
             code_verifier,
         } = self.repository.new_pkce()?;
         self.repository
-            .new_pkce_session(&csrf_token, &code_verifier)
+            .new_pkce_session(&csrf_token, &code_verifier, from_url)
             .await
             .map_err(|error| Error::Pkce(error.into()))?;
 

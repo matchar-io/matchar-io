@@ -17,6 +17,7 @@ serde = { workspace = true }
 thiserror = { workspace = true }
 time = { workspace = true }
 tokio = { workspace = true }
+url = { workspace = true }
 
 [build-dependencies]
 anyhow = { workspace = true }

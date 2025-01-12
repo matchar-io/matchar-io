@@ -3,6 +3,7 @@ CREATE TABLE
         "pkce_id" UUID,
         "csrf_token" VARCHAR(22) NOT NULL,
         "code_verifier" VARCHAR(43) NOT NULL,
+        "from_url" VARCHAR(255) NOT NULL,
         "created_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
         "expired_at" TIMESTAMP NOT NULL,
         PRIMARY KEY ("pkce_id")

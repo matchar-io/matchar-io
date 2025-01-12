@@ -13,6 +13,7 @@ reqwest = { workspace = true }
 serde = { workspace = true }
 sqlx = { workspace = true }
 time = { workspace = true }
+url = { workspace = true }
 
 [build-dependencies]
 anyhow = { workspace = true }

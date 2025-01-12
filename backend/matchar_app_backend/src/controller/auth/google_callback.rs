@@ -1,4 +1,4 @@
-use axum::{extract::Query, http::StatusCode, Extension};
+use axum::{extract::Query, http::StatusCode, response::Redirect, Extension};
 use database::ConnectionPool;
 use matchar_app_adapter::auth::google_callback::Adapter;
 use matchar_app_service::auth::google_callback::{Data, Error, Service};
@@ -12,13 +12,14 @@ pub struct Parameter {
 pub async fn handler(
     Extension(pool): Extension<ConnectionPool>,
     Query(parameter): Query<Parameter>,
-) -> Result<crate::GeneratedSessionToken, (StatusCode, String)> {
+) -> Result<(crate::GeneratedSessionToken, Redirect), (StatusCode, String)> {
     let adapter = Adapter::new(pool)
         .map_err(|error| (StatusCode::INTERNAL_SERVER_ERROR, format!("{:?}", error)))?;
     let Data {
         session_id,
         name,
         image_url,
+        from_url,
     } = Service::new(adapter)
         .execute(parameter.code, parameter.state)
         .await
@@ -32,5 +33,5 @@ pub async fn handler(
         })?;
     let session_token = crate::GeneratedSessionToken::new(session_id, name, image_url);
 
-    Ok(session_token)
+    Ok((session_token, Redirect::to(from_url.as_str())))
 }

@@ -46,6 +46,7 @@ pub struct Data {
     pub session_id: SessionId,
     pub name: UserName,
     pub image_url: ImageUrl,
+    pub from_url: url::Url,
 }
 
 pub struct CsrfToken(String);
@@ -57,6 +58,7 @@ pub struct CodeVerifier(String);
 pub struct PkceEntity {
     pub pkce_id: PkceId,
     pub code_verifier: CodeVerifier,
+    pub from_url: url::Url,
     pub expired_at: time::OffsetDateTime,
 }
 
@@ -112,6 +114,7 @@ where
         let PkceEntity {
             pkce_id,
             code_verifier,
+            from_url,
             expired_at,
         } = match self.repository.find_pkce_by_csrf_token(&csrf_token).await? {
             Some(pkce) => pkce,
@@ -152,6 +155,7 @@ where
             session_id,
             name: user.name,
             image_url: user.image_url,
+            from_url,
         })
     }
 }
@@ -189,10 +193,16 @@ impl GoogleSubject {
 }
 
 impl PkceEntity {
-    pub fn new(pkce_id: PkceId, code_verifier: String, expired_at: time::OffsetDateTime) -> Self {
+    pub fn new(
+        pkce_id: PkceId,
+        code_verifier: String,
+        from_url: url::Url,
+        expired_at: time::OffsetDateTime,
+    ) -> Self {
         Self {
             pkce_id,
             code_verifier: CodeVerifier(code_verifier.to_owned()),
+            from_url,
             expired_at,
         }
     }

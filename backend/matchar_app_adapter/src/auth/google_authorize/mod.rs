@@ -36,6 +36,7 @@ impl Repository for Adapter {
         &self,
         csrf_token: &CsrfToken,
         code_verifier: &CodeVerifier,
+        from_url: url::Url,
     ) -> Result<(), Error> {
         let pkce_id = PkceId::random();
         let expired_at = time::OffsetDateTime::now_utc() + time::Duration::minutes(10);
@@ -43,12 +44,13 @@ impl Repository for Adapter {
 
         sqlx::query!(
             r#"
-            INSERT INTO "pkce" ("pkce_id", "csrf_token", "code_verifier", "expired_at")
-            VALUES ($1, $2, $3, $4)
+            INSERT INTO "pkce" ("pkce_id", "csrf_token", "code_verifier", "from_url", "expired_at")
+            VALUES ($1, $2, $3, $4, $5)
             "#,
             pkce_id.as_uuid(),
             csrf_token.as_str(),
             code_verifier.as_str(),
+            from_url.as_str(),
             expired_at,
         )
         .execute(&*self.pool)

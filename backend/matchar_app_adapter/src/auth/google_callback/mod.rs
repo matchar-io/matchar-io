@@ -38,6 +38,7 @@ impl Repository for Adapter {
             SELECT
                 "pkce_id",
                 "code_verifier",
+                "from_url",
                 "expired_at"
             FROM
                 "pkce"
@@ -54,6 +55,7 @@ impl Repository for Adapter {
             Some(row) => Ok(Some(PkceEntity::new(
                 PkceId::new_unchecked(row.pkce_id),
                 row.code_verifier,
+                url::Url::parse(&row.from_url).map_err(|error| Error::Database(error.into()))?,
                 row.expired_at.assume_utc(),
             ))),
             None => Ok(None),
