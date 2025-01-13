@@ -297,7 +297,7 @@ impl Repository for Adapter {
         Ok(session_id)
     }
 
-    async fn logged_in_event(&self, user_id: UserId) -> Result<(), Error> {
+    async fn logged_in_event(&self, _user_id: UserId) -> Result<(), Error> {
         // std::todo!();
 
         Ok(())

@@ -2,6 +2,7 @@
 extern crate serde;
 
 pub mod auth;
+pub mod me;
 
 mod shared;
 

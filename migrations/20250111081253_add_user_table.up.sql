@@ -2,6 +2,8 @@ CREATE TABLE
     "user" (
         "user_id" UUID,
         "created_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        "deactivated_at" TIMESTAMP NOT NULL,
+        "locked_at" TIMESTAMP NOT NULL,
         PRIMARY KEY ("user_id")
     );
 

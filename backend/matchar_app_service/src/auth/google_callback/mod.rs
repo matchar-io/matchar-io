@@ -78,8 +78,6 @@ pub struct UserEntity {
     pub image_url: ImageUrl,
 }
 
-pub struct SessionToken(pub String);
-
 pub struct UserToken(pub String);
 
 #[derive(Debug, Error)]

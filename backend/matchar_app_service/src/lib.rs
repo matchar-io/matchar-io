@@ -4,3 +4,4 @@
 extern crate thiserror;
 
 pub mod auth;
+pub mod me;

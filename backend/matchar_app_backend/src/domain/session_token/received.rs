@@ -9,6 +9,7 @@ use jsonwebtoken::{DecodingKey, TokenData, Validation};
 use refinement::SessionId;
 use time::OffsetDateTime;
 
+#[derive(Debug, Clone)]
 pub struct ReceivedSessionToken {
     session_id: SessionId,
 }
@@ -20,6 +21,13 @@ pub enum ReceivedSessionTokenError {
     Expired,
     NoCookies,
     NoCookie,
+}
+
+impl ReceivedSessionToken {
+    #[inline]
+    pub const fn session_id(&self) -> SessionId {
+        self.session_id
+    }
 }
 
 impl std::str::FromStr for ReceivedSessionToken {
