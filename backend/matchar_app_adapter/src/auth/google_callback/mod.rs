@@ -4,7 +4,9 @@ use matchar_app_service::auth::google_callback::{
     UserInfo,
 };
 use oauth2::{AccessToken, GoogleOauth2};
-use refinement::{EmailAddress, IdentityProviderId, ImageUrl, PkceId, SessionId, UserId, UserName};
+use refinement::{
+    EmailAddress, IdentityProviderId, ImageUrl, PkceId, SessionId, UserId, UserName, ETERNITY,
+};
 use std::str::FromStr;
 use time::{Duration, OffsetDateTime, PrimitiveDateTime};
 
@@ -217,11 +219,15 @@ impl Repository for Adapter {
         sqlx::query!(
             r#"
             INSERT INTO "user" (
-                "user_id"
+                "user_id",
+                "deactivated_at",
+                "locked_at"
             )
-            VALUES ($1)
+            VALUES ($1, $2, $3)
             "#,
             user_id.as_uuid(),
+            ETERNITY,
+            ETERNITY,
         )
         .execute(&mut *transaction)
         .await
