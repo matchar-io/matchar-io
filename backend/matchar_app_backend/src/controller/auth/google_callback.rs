@@ -1,4 +1,9 @@
-use axum::{extract::Query, http::StatusCode, response::Redirect, Extension};
+use axum::{
+    extract::Query,
+    http::StatusCode,
+    response::{IntoResponse, Redirect},
+    Extension,
+};
 use database::ConnectionPool;
 use matchar_app_adapter::auth::google_callback::Adapter;
 use matchar_app_service::auth::google_callback::{Data, Error, Service};
@@ -9,12 +14,15 @@ pub struct Parameter {
     state: String,
 }
 
+pub enum ErrorKind {
+    Service(Error),
+}
+
 pub async fn handler(
     Extension(pool): Extension<ConnectionPool>,
     Query(parameter): Query<Parameter>,
-) -> Result<(crate::GeneratedSessionToken, Redirect), (StatusCode, String)> {
-    let adapter = Adapter::new(pool)
-        .map_err(|error| (StatusCode::INTERNAL_SERVER_ERROR, format!("{:?}", error)))?;
+) -> Result<(crate::GeneratedSessionToken, Redirect), ErrorKind> {
+    let adapter = Adapter::new(pool).map_err(ErrorKind::Service)?;
     let Data {
         session_id,
         name,
@@ -23,15 +31,21 @@ pub async fn handler(
     } = Service::new(adapter)
         .execute(parameter.code, parameter.state)
         .await
-        .map_err(|error| match error {
-            Error::NoMatched => (StatusCode::UNAUTHORIZED, "NoMatched".to_string()),
-            Error::Expired => (StatusCode::BAD_REQUEST, "Expired".to_string()),
-            Error::Verify(error)
-            | Error::Google(error)
-            | Error::Oauth2(error)
-            | Error::Database(error) => (StatusCode::INTERNAL_SERVER_ERROR, format!("{:?}", error)),
-        })?;
+        .map_err(ErrorKind::Service)?;
     let session_token = crate::GeneratedSessionToken::new(session_id, name, image_url);
 
     Ok((session_token, Redirect::to(from_url.as_str())))
+}
+
+impl IntoResponse for ErrorKind {
+    fn into_response(self) -> axum::http::Response<axum::body::Body> {
+        match self {
+            ErrorKind::Service(Error::NoMatched) => StatusCode::UNAUTHORIZED.into_response(),
+            ErrorKind::Service(Error::Expired) => StatusCode::GONE.into_response(),
+            ErrorKind::Service(Error::Verify(_)) => StatusCode::BAD_REQUEST.into_response(),
+            ErrorKind::Service(error) => {
+                (StatusCode::INTERNAL_SERVER_ERROR, format!("{:?}", error)).into_response()
+            }
+        }
+    }
 }
