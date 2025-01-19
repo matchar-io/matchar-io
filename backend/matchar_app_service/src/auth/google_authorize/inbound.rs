@@ -1,8 +1,8 @@
-pub struct FromUrl(String);
-
 pub struct Data {
     pub(crate) from_url: FromUrl,
 }
+
+pub struct FromUrl(String);
 
 #[derive(Debug)]
 pub enum Error {

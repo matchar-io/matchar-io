@@ -22,10 +22,12 @@ impl Repository for Adapter {
     type Oauth = oauth::OauthAdapter;
     type Session = session::SessionAdapter;
 
+    #[inline]
     fn oauth(&self) -> &Self::Oauth {
         &self.oauth
     }
 
+    #[inline]
     fn session(&self) -> &Self::Session {
         &self.session
     }

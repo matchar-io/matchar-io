@@ -2,9 +2,11 @@ use super::{inbound, outbound, Error};
 
 pub trait Repository: Sync + Send + 'static {
     type Oauth: OauthRepository;
+
     type Session: SessionRepository;
 
     fn oauth(&self) -> &Self::Oauth;
+
     fn session(&self) -> &Self::Session;
 }
 

@@ -6,7 +6,7 @@ use axum::{
 };
 use database::ConnectionPool;
 use matchar_app_adapter::auth::google_callback::Adapter;
-use matchar_app_service::auth::google_callback::{Data, Error, Service};
+use matchar_app_service::auth::google_callback::{inbound, outbound, Error, Service};
 
 #[derive(Deserialize)]
 pub struct Parameter {
@@ -22,14 +22,15 @@ pub async fn handler(
     Extension(pool): Extension<ConnectionPool>,
     Query(parameter): Query<Parameter>,
 ) -> Result<(crate::GeneratedSessionToken, Redirect), ErrorKind> {
+    let data = inbound::Data::new(parameter.code.as_str(), parameter.state.as_str());
     let adapter = Adapter::new(pool).map_err(ErrorKind::Service)?;
-    let Data {
+    let outbound::Data {
         session_id,
         name,
         image_url,
         from_url,
     } = Service::new(adapter)
-        .execute(parameter.code, parameter.state)
+        .execute(data)
         .await
         .map_err(ErrorKind::Service)?;
     let session_token = crate::GeneratedSessionToken::new(session_id, name, image_url);
