@@ -11,7 +11,9 @@ pub struct Service<R> {
 #[derive(Debug, Error)]
 pub enum Error {
     #[error("Failed to create PKCE: {0}")]
-    Pkce(anyhow::Error),
+    NewPkce(anyhow::Error),
+    #[error("Failed to store PKCE: {0}")]
+    StorePkce(#[from] anyhow::Error),
 }
 
 impl<R> Service<R> {
@@ -35,9 +37,8 @@ where
         } = self.repository.oauth().new_pkce()?;
         self.repository
             .session()
-            .with_pkce(&csrf_token, &code_verifier, from_url)
-            .await
-            .map_err(|error| Error::Pkce(error.into()))?;
+            .store_pkce(&csrf_token, &code_verifier, from_url)
+            .await?;
 
         Ok(outbound::Data { redirect_url })
     }

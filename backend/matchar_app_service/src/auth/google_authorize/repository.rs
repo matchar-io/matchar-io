@@ -15,7 +15,7 @@ pub trait OauthRepository {
 }
 
 pub trait SessionRepository {
-    async fn with_pkce(
+    async fn store_pkce(
         &self,
         csrf_token: &outbound::CsrfToken,
         code_verifier: &outbound::CodeVerifier,

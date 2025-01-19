@@ -13,7 +13,7 @@ impl SessionAdapter {
 }
 
 impl SessionRepository for SessionAdapter {
-    async fn with_pkce(
+    async fn store_pkce(
         &self,
         csrf_token: &outbound::CsrfToken,
         code_verifier: &outbound::CodeVerifier,
@@ -36,7 +36,7 @@ impl SessionRepository for SessionAdapter {
         )
         .execute(&*self.pool)
         .await
-        .map_err(|error| Error::Pkce(error.into()))?;
+        .map_err(|error| Error::StorePkce(error.into()))?;
 
         Ok(())
     }

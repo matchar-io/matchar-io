@@ -10,7 +10,7 @@ impl OauthRepository for OauthAdapter {
             crate::GOOGLE_CLIENT_SECRET,
             crate::GOOGLE_REDIRECT_URL,
         )
-        .map_err(|error| Error::Pkce(error.into()))?
+        .map_err(|error| Error::NewPkce(error.into()))?
         .start();
 
         Ok(outbound::Pkce::new(
