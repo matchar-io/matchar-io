@@ -6,7 +6,7 @@ use axum::{
 };
 use database::ConnectionPool;
 use matchar_app_adapter::auth::google_authorize::Adapter;
-use matchar_app_service::auth::google_authorize::{Data, Error, Service};
+use matchar_app_service::auth::google_authorize::{inbound, outbound, Error, Service};
 
 #[derive(Deserialize)]
 pub struct Parameter {
@@ -14,7 +14,8 @@ pub struct Parameter {
 }
 
 pub enum ErrorKind {
-    MalformedUrl,
+    #[allow(dead_code)]
+    Data(inbound::Error),
     Service(Error),
 }
 
@@ -22,11 +23,10 @@ pub async fn handler(
     Extension(pool): Extension<ConnectionPool>,
     Query(parameter): Query<Parameter>,
 ) -> Result<Redirect, ErrorKind> {
-    let from_url = url::Url::parse(parameter.from.as_str()).map_err(|_| ErrorKind::MalformedUrl)?;
-
+    let data = inbound::Data::new(&parameter.from).map_err(ErrorKind::Data)?;
     let adapter = Adapter::new(pool);
-    let Data { redirect_url } = Service::new(adapter)
-        .execute(from_url)
+    let outbound::Data { redirect_url } = Service::new(adapter)
+        .execute(data)
         .await
         .map_err(ErrorKind::Service)?;
 
@@ -36,7 +36,7 @@ pub async fn handler(
 impl IntoResponse for ErrorKind {
     fn into_response(self) -> axum::http::Response<axum::body::Body> {
         match self {
-            ErrorKind::MalformedUrl => StatusCode::BAD_REQUEST.into_response(),
+            ErrorKind::Data(_) => StatusCode::BAD_REQUEST.into_response(),
             ErrorKind::Service(error) => {
                 (StatusCode::INTERNAL_SERVER_ERROR, format!("{:?}", error)).into_response()
             }
