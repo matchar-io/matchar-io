@@ -6,7 +6,7 @@ use axum::{
 };
 use database::ConnectionPool;
 use matchar_app_adapter::auth::google_callback::Adapter;
-use matchar_app_service::auth::google_callback::{inbound, outbound, Error, Service};
+use matchar_app_service::auth::google_callback::{inbound, outbound, Error, Service, UseCase};
 
 #[derive(Deserialize)]
 pub struct Parameter {
@@ -30,7 +30,7 @@ pub async fn handler(
         image_url,
         from_url,
     } = Service::new(adapter)
-        .execute(data)
+        .google_callback(data)
         .await
         .map_err(ErrorKind::Service)?;
     let session_token = crate::GeneratedSessionToken::new(session_id, name, image_url);

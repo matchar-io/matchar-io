@@ -6,7 +6,7 @@ use axum::{
 };
 use database::ConnectionPool;
 use matchar_app_adapter::auth::google_authorize::Adapter;
-use matchar_app_service::auth::google_authorize::{inbound, outbound, Error, Service};
+use matchar_app_service::auth::google_authorize::{inbound, outbound, Error, Service, UseCase};
 
 #[derive(Deserialize)]
 pub struct Parameter {
@@ -26,7 +26,7 @@ pub async fn handler(
     let data = inbound::Data::new(&parameter.from).map_err(ErrorKind::Data)?;
     let adapter = Adapter::new(pool);
     let outbound::Data { redirect_url } = Service::new(adapter)
-        .execute(data)
+        .google_authorize(data)
         .await
         .map_err(ErrorKind::Service)?;
 

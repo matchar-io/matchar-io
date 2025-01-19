@@ -2,7 +2,7 @@ use crate::Session;
 use axum::{http::StatusCode, response::IntoResponse, Extension, Json};
 use database::ConnectionPool;
 use matchar_app_adapter::me::information::Adapter;
-use matchar_app_service::me::information::{Data, Error, Service};
+use matchar_app_service::me::information::{inbound, outbound, Error, Service, UseCase};
 use refinement::{ImageUrl, UserId, UserName};
 
 #[derive(Serialize)]
@@ -25,13 +25,14 @@ pub async fn handler(
     session: Session,
     Extension(pool): Extension<ConnectionPool>,
 ) -> Result<Json<Response>, ErrorKind> {
+    let data = inbound::Data::new(session.session_id());
     let adapter = Adapter::new(pool);
-    let Data {
+    let outbound::Data {
         user_id,
         name,
         image_url,
     } = Service::new(adapter)
-        .execute(session.session_id())
+        .me_information(data)
         .await
         .map_err(ErrorKind::Service)?;
     let user = User {
