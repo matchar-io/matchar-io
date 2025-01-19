@@ -10,7 +10,7 @@ serde = { workspace = true }
 thiserror = { workspace = true }
 time = { workspace = true }
 url = { workspace = true }
-uuid = { version = "1.11.0", features = ["v7"] }
+uuid = { workspace = true }
 
 [build-dependencies]
 anyhow = { workspace = true }

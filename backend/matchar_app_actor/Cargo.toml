@@ -1,0 +1,8 @@
+[package]
+name = "matchar_app_actor"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+postbox = { path = "../postbox" }
+refinement = { path = "../refinement" }
