@@ -1,19 +1,19 @@
 use database::ConnectionPool;
-use matchar_app_service::auth::google_callback::{outbound, Error, UserRepository};
+use matchar_app_service::auth::google_callback::{outbound, Error, UserPort};
 use refinement::{EmailAddress, IdentityProviderId, ImageUrl, UserId, UserName, ETERNITY};
 use std::str::FromStr;
 
-pub struct UserAdapter {
+pub struct UserRepository {
     pool: ConnectionPool,
 }
 
-impl UserAdapter {
+impl UserRepository {
     pub const fn new(pool: ConnectionPool) -> Self {
         Self { pool }
     }
 }
 
-impl UserRepository for UserAdapter {
+impl UserPort for UserRepository {
     async fn find_by_oauth_sub(
         &self,
         sub: &outbound::GoogleSubject,

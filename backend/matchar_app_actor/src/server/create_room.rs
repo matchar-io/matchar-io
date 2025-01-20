@@ -7,7 +7,7 @@ struct CreateRoomMessage {
 
 impl ServerPostbox {
     pub async fn create_room(&self, name: String) -> PostboxResult<()> {
-        self.postbox.send(CreateRoomMessage { name }).await
+        self.postbox.ask(CreateRoomMessage { name }).await
     }
 }
 

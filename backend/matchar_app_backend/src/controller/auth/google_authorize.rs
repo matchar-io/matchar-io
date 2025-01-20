@@ -5,7 +5,7 @@ use axum::{
     Extension,
 };
 use database::ConnectionPool;
-use matchar_app_adapter::auth::google_authorize::Adapter;
+use matchar_app_repository::auth::google_authorize::Repository;
 use matchar_app_service::auth::google_authorize::{inbound, outbound, Error, Service, UseCase};
 
 #[derive(Deserialize)]
@@ -24,8 +24,8 @@ pub async fn handler(
     Query(parameter): Query<Parameter>,
 ) -> Result<Redirect, ErrorKind> {
     let data = inbound::Data::new(&parameter.from).map_err(ErrorKind::Data)?;
-    let adapter = Adapter::new(pool);
-    let outbound::Data { redirect_url } = Service::new(adapter)
+    let repository = Repository::new(pool);
+    let outbound::Data { redirect_url } = Service::new(repository)
         .google_authorize(data)
         .await
         .map_err(ErrorKind::Service)?;

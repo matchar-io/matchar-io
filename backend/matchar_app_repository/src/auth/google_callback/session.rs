@@ -1,19 +1,19 @@
 use database::ConnectionPool;
-use matchar_app_service::auth::google_callback::{Error, SessionRepository};
+use matchar_app_service::auth::google_callback::{Error, SessionPort};
 use refinement::{SessionId, UserId};
 use time::{Duration, OffsetDateTime, PrimitiveDateTime};
 
-pub struct SessionAdapter {
+pub struct SessionRepository {
     pool: ConnectionPool,
 }
 
-impl SessionAdapter {
+impl SessionRepository {
     pub const fn new(pool: ConnectionPool) -> Self {
         Self { pool }
     }
 }
 
-impl SessionRepository for SessionAdapter {
+impl SessionPort for SessionRepository {
     async fn create(&self, user_id: UserId) -> Result<SessionId, Error> {
         let session_id = SessionId::random();
         let expired_at = OffsetDateTime::now_utc() + Duration::days(30);

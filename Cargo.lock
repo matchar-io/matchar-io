@@ -1205,7 +1205,26 @@ dependencies = [
 ]
 
 [[package]]
-name = "matchar_app_adapter"
+name = "matchar_app_backend"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "axum",
+ "axum-extra",
+ "database",
+ "jsonwebtoken",
+ "matchar_app_repository",
+ "matchar_app_service",
+ "refinement",
+ "serde",
+ "thiserror 2.0.11",
+ "time",
+ "tokio",
+ "url",
+]
+
+[[package]]
+name = "matchar_app_repository"
 version = "0.1.0"
 dependencies = [
  "anyhow",
@@ -1217,25 +1236,6 @@ dependencies = [
  "serde",
  "sqlx",
  "time",
- "url",
-]
-
-[[package]]
-name = "matchar_app_backend"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "axum",
- "axum-extra",
- "database",
- "jsonwebtoken",
- "matchar_app_adapter",
- "matchar_app_service",
- "refinement",
- "serde",
- "thiserror 2.0.11",
- "time",
- "tokio",
  "url",
 ]
 

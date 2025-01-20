@@ -1,14 +1,11 @@
-use super::{
-    inbound, outbound, EventRepository, PkceRepository, Repository, SessionRepository,
-    UserRepository,
-};
+use super::{inbound, outbound, EventPort, PkcePort, Port, SessionPort, UserPort};
 
 pub trait UseCase {
     async fn google_callback(&self, data: inbound::Data) -> Result<outbound::Data, Error>;
 }
 
-pub struct Service<R> {
-    repository: R,
+pub struct Service<P> {
+    port: P,
 }
 
 #[derive(Debug, Error)]
@@ -28,15 +25,15 @@ pub enum Error {
     Database(anyhow::Error),
 }
 
-impl<R> Service<R> {
-    pub const fn new(repository: R) -> Self {
-        Self { repository }
+impl<P> Service<P> {
+    pub const fn new(port: P) -> Self {
+        Self { port }
     }
 }
 
-impl<R> UseCase for Service<R>
+impl<P> UseCase for Service<P>
 where
-    R: Repository,
+    P: Port,
 {
     async fn google_callback(
         &self,
@@ -47,12 +44,7 @@ where
             code_verifier,
             from_url,
             expired_at,
-        } = match self
-            .repository
-            .pkce()
-            .find_by_csrf_token(&csrf_token)
-            .await?
-        {
+        } = match self.port.pkce().find_by_csrf_token(&csrf_token).await? {
             Some(pkce) => pkce,
             None => return Err(Error::NoMatched),
         };
@@ -61,24 +53,15 @@ where
         }
 
         let access_token = self
-            .repository
+            .port
             .pkce()
             .verify_code(pkce_id, &code, &code_verifier)
             .await?;
-        let user_info = self
-            .repository
-            .pkce()
-            .user_info_in_google(&access_token)
-            .await?;
-        let user = match self
-            .repository
-            .user()
-            .find_by_oauth_sub(&user_info.sub)
-            .await?
-        {
+        let user_info = self.port.pkce().user_info_in_google(&access_token).await?;
+        let user = match self.port.user().find_by_oauth_sub(&user_info.sub).await? {
             Some(user) => user,
             None => {
-                self.repository
+                self.port
                     .user()
                     .create(
                         &user_info.sub,
@@ -90,12 +73,9 @@ where
             }
         };
 
-        let session_id = self.repository.session().create(user.user_id).await?;
+        let session_id = self.port.session().create(user.user_id).await?;
 
-        self.repository
-            .event()
-            .login_completed(user.user_id)
-            .await?;
+        self.port.event().login_completed(user.user_id).await?;
 
         Ok(outbound::Data {
             session_id,

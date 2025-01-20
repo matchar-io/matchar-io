@@ -1,14 +1,14 @@
 use super::{inbound, outbound, Error};
 use refinement::{EmailAddress, ImageUrl, PkceId, SessionId, UserId, UserName};
 
-pub trait Repository: Sync + Send + 'static {
-    type Pkce: PkceRepository;
+pub trait Port: Sync + Send + 'static {
+    type Pkce: PkcePort;
 
-    type User: UserRepository;
+    type User: UserPort;
 
-    type Session: SessionRepository;
+    type Session: SessionPort;
 
-    type Event: EventRepository;
+    type Event: EventPort;
 
     fn pkce(&self) -> &Self::Pkce;
 
@@ -19,7 +19,7 @@ pub trait Repository: Sync + Send + 'static {
     fn event(&self) -> &Self::Event;
 }
 
-pub trait PkceRepository {
+pub trait PkcePort {
     type AccessToken;
 
     async fn find_by_csrf_token(
@@ -40,7 +40,7 @@ pub trait PkceRepository {
     ) -> Result<outbound::UserInGoogle, Error>;
 }
 
-pub trait UserRepository {
+pub trait UserPort {
     async fn find_by_oauth_sub(
         &self,
         sub: &outbound::GoogleSubject,
@@ -55,10 +55,10 @@ pub trait UserRepository {
     ) -> Result<outbound::UserEntity, Error>;
 }
 
-pub trait SessionRepository {
+pub trait SessionPort {
     async fn create(&self, user_id: UserId) -> Result<SessionId, Error>;
 }
 
-pub trait EventRepository {
+pub trait EventPort {
     async fn login_completed(&self, user_id: UserId) -> Result<(), Error>;
 }

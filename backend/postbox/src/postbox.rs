@@ -62,9 +62,10 @@ impl<A: Actor> Postbox<A> {
         self.id
     }
 
-    pub async fn send<M: Message>(&self, message: M) -> PostboxResult<M::Response>
+    pub async fn ask<M>(&self, message: M) -> PostboxResult<M::Response>
     where
         A: Handler<M, Response = M::Response>,
+        M: Message,
     {
         let (tx, rx) = oneshot::channel::<M::Response>();
         self.poster
@@ -73,6 +74,17 @@ impl<A: Actor> Postbox<A> {
             .map_err(|_| PostboxError::Send)?;
         let response = rx.await.map_err(|_| PostboxError::Recv)?;
         Ok(response)
+    }
+
+    pub fn tell<M>(&self, message: M) -> PostboxResult<()>
+    where
+        A: Handler<M, Response = M::Response>,
+        M: Message,
+    {
+        self.poster
+            .try_send(Pack(Box::new(Post(Some(InnerPost { tx, message })))))
+            .map_err(|_| PostboxError::Send)?;
+        Ok(())
     }
 
     #[inline]

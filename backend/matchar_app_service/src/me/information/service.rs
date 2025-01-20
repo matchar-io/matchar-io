@@ -1,11 +1,11 @@
-use super::{inbound, outbound, Repository, UserRepository};
+use super::{inbound, outbound, Port, UserPort};
 
 pub trait UseCase {
     async fn me_information(&self, data: inbound::Data) -> Result<outbound::Data, Error>;
 }
 
-pub struct Service<R> {
-    repository: R,
+pub struct Service<P> {
+    port: P,
 }
 
 #[derive(Debug, Error)]
@@ -21,27 +21,22 @@ pub enum Error {
     DatabaseError(anyhow::Error),
 }
 
-impl<R> Service<R> {
-    pub const fn new(repository: R) -> Self {
-        Self { repository }
+impl<P> Service<P> {
+    pub const fn new(port: P) -> Self {
+        Self { port }
     }
 }
 
-impl<R> UseCase for Service<R>
+impl<P> UseCase for Service<P>
 where
-    R: Repository,
+    P: Port,
 {
     async fn me_information(
         &self,
         inbound::Data { session_id }: inbound::Data,
     ) -> Result<outbound::Data, Error> {
         let now = time::OffsetDateTime::now_utc();
-        let user = match self
-            .repository
-            .user()
-            .find_by_session_id(session_id)
-            .await?
-        {
+        let user = match self.port.user().find_by_session_id(session_id).await? {
             Some(user) if user.deactivated_at < now => return Err(Error::Deactivated),
             Some(user) if user.locked_at < now => return Err(Error::Locked),
             Some(user) => user,

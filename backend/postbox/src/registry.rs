@@ -1,26 +1,11 @@
 use crate::{Actor, Postbox};
-use std::collections::HashMap;
+use std::{any::TypeId, collections::HashMap};
 use uuid::Uuid;
 
 type DynamicPostbox = Box<dyn std::any::Any + Send + Sync>;
 
-#[derive(Clone, Copy, PartialEq, Eq, Hash)]
-pub struct ActorId {
-    type_id: std::any::TypeId,
-    id: Uuid,
-}
-
 pub struct Registry {
-    map: HashMap<ActorId, DynamicPostbox>,
-}
-
-impl ActorId {
-    pub fn new<A: Actor>(id: Uuid) -> Self {
-        Self {
-            type_id: std::any::TypeId::of::<A>(),
-            id,
-        }
-    }
+    map: HashMap<TypeId, HashMap<Uuid, DynamicPostbox>>,
 }
 
 impl Registry {
@@ -42,28 +27,41 @@ impl Registry {
 
     pub fn insert<A: Actor>(&mut self, postbox: Postbox<A>) {
         self.map
-            .insert(ActorId::new::<A>(postbox.id()), Box::new(postbox));
+            .entry(TypeId::of::<A>())
+            .or_insert_with(HashMap::new)
+            .insert(postbox.id(), Box::new(postbox));
     }
 
     pub fn remove<A: Actor>(&mut self, id: Uuid) {
-        self.map.remove(&ActorId::new::<A>(id));
+        if let Some(map) = self.map.get_mut(&TypeId::of::<A>()) {
+            map.remove(&id);
+        }
     }
 
     pub fn get<A: Actor>(&self, id: Uuid) -> Option<Postbox<A>> {
         self.map
-            .get(&ActorId::new::<A>(id))
+            .get(&TypeId::of::<A>())
+            .and_then(|map| map.get(&id))
             .and_then(|postbox| postbox.downcast_ref().cloned())
     }
 
     pub fn contains<A: Actor>(&self, id: Uuid) -> bool {
-        self.map.contains_key(&ActorId::new::<A>(id))
+        self.map
+            .get(&TypeId::of::<A>())
+            .map_or(false, |map| map.contains_key(&id))
     }
 
     pub fn contains_actor<A: Actor>(&self) -> bool {
-        let type_id = std::any::TypeId::of::<A>();
+        self.map.contains_key(&TypeId::of::<A>())
+    }
 
+    pub fn iter_actor<A: Actor>(&self) -> impl Iterator<Item = Postbox<A>> + '_ {
         self.map
-            .iter()
-            .any(|(actor_id, _)| actor_id.type_id == type_id)
+            .get(&TypeId::of::<A>())
+            .into_iter()
+            .flat_map(|map| {
+                map.values()
+                    .flat_map(|postbox| postbox.downcast_ref().cloned())
+            })
     }
 }

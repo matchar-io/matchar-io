@@ -10,7 +10,7 @@ struct EnterRoomMessage {
 impl RoomPostbox {
     pub async fn enter_room(&self, room_id: RoomId, user_id: UserId) -> PostboxResult<()> {
         self.postbox
-            .send(EnterRoomMessage { room_id, user_id })
+            .ask(EnterRoomMessage { room_id, user_id })
             .await
     }
 }

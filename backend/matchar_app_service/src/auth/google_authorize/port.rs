@@ -1,20 +1,20 @@
 use super::{inbound, outbound, Error};
 
-pub trait Repository: Sync + Send + 'static {
-    type Oauth: OauthRepository;
+pub trait Port: Sync + Send + 'static {
+    type Oauth: OauthPort;
 
-    type Session: SessionRepository;
+    type Session: SessionPort;
 
     fn oauth(&self) -> &Self::Oauth;
 
     fn session(&self) -> &Self::Session;
 }
 
-pub trait OauthRepository {
+pub trait OauthPort {
     fn new_pkce(&self) -> Result<outbound::Pkce, Error>;
 }
 
-pub trait SessionRepository {
+pub trait SessionPort {
     async fn store_pkce(
         &self,
         csrf_token: &outbound::CsrfToken,

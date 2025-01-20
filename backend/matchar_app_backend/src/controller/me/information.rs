@@ -1,7 +1,7 @@
 use crate::Session;
 use axum::{http::StatusCode, response::IntoResponse, Extension, Json};
 use database::ConnectionPool;
-use matchar_app_adapter::me::information::Adapter;
+use matchar_app_repository::me::information::Repository;
 use matchar_app_service::me::information::{inbound, outbound, Error, Service, UseCase};
 use refinement::{ImageUrl, UserId, UserName};
 
@@ -26,12 +26,12 @@ pub async fn handler(
     Extension(pool): Extension<ConnectionPool>,
 ) -> Result<Json<Response>, ErrorKind> {
     let data = inbound::Data::new(session.session_id());
-    let adapter = Adapter::new(pool);
+    let repository = Repository::new(pool);
     let outbound::Data {
         user_id,
         name,
         image_url,
-    } = Service::new(adapter)
+    } = Service::new(repository)
         .me_information(data)
         .await
         .map_err(ErrorKind::Service)?;

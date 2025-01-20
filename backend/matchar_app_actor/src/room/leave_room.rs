@@ -8,7 +8,7 @@ struct LeaveRoomMessage {
 
 impl RoomPostbox {
     pub async fn leave_room(&self, user_id: UserId) -> PostboxResult<()> {
-        self.postbox.send(LeaveRoomMessage { user_id }).await
+        self.postbox.ask(LeaveRoomMessage { user_id }).await
     }
 }
 

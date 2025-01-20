@@ -6,3 +6,4 @@ edition = "2021"
 [dependencies]
 postbox = { path = "../postbox" }
 refinement = { path = "../refinement" }
+uuid = { workspace = true }

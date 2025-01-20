@@ -1,11 +1,11 @@
-use super::{inbound, outbound, OauthRepository, Repository, SessionRepository};
+use super::{inbound, outbound, OauthPort, Port, SessionPort};
 
 pub trait UseCase {
     async fn google_authorize(&self, data: inbound::Data) -> Result<outbound::Data, Error>;
 }
 
-pub struct Service<R> {
-    repository: R,
+pub struct Service<P> {
+    port: P,
 }
 
 #[derive(Debug, Error)]
@@ -16,15 +16,15 @@ pub enum Error {
     StorePkce(#[from] anyhow::Error),
 }
 
-impl<R> Service<R> {
-    pub const fn new(repository: R) -> Self {
-        Self { repository }
+impl<P> Service<P> {
+    pub const fn new(port: P) -> Self {
+        Self { port }
     }
 }
 
-impl<R> UseCase for Service<R>
+impl<P> UseCase for Service<P>
 where
-    R: Repository,
+    P: Port,
 {
     async fn google_authorize(
         &self,
@@ -34,8 +34,8 @@ where
             redirect_url,
             csrf_token,
             code_verifier,
-        } = self.repository.oauth().new_pkce()?;
-        self.repository
+        } = self.port.oauth().new_pkce()?;
+        self.port
             .session()
             .store_pkce(&csrf_token, &code_verifier, from_url)
             .await?;

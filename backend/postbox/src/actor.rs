@@ -44,11 +44,18 @@ pub struct Context<A: Actor> {
 
 impl<A: Actor> Context<A> {
     #[inline]
-    pub async fn send<M: Message>(&mut self, message: M) -> PostboxResult<M::Response>
+    pub async fn ask<M: Message>(&mut self, message: M) -> PostboxResult<M::Response>
     where
         A: Handler<M, Response = M::Response>,
     {
-        self.postbox.send(message).await
+        self.postbox.ask(message).await
+    }
+
+    pub async fn tell<M: Message>(&mut self, message: M) -> PostboxResult<()>
+    where
+        A: Handler<M, Response = ()>,
+    {
+        self.postbox.tell(message).await
     }
 
     #[inline]

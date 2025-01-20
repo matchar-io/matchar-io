@@ -1,18 +1,18 @@
 use database::ConnectionPool;
-use matchar_app_service::auth::google_authorize::{inbound, outbound, Error, SessionRepository};
+use matchar_app_service::auth::google_authorize::{inbound, outbound, Error, SessionPort};
 use refinement::PkceId;
 
-pub struct SessionAdapter {
+pub struct SessionRepository {
     pool: ConnectionPool,
 }
 
-impl SessionAdapter {
+impl SessionRepository {
     pub const fn new(pool: ConnectionPool) -> Self {
         Self { pool }
     }
 }
 
-impl SessionRepository for SessionAdapter {
+impl SessionPort for SessionRepository {
     async fn store_pkce(
         &self,
         csrf_token: &outbound::CsrfToken,

@@ -1,9 +1,9 @@
-use matchar_app_service::auth::google_authorize::{outbound, Error, OauthRepository};
+use matchar_app_service::auth::google_authorize::{outbound, Error, OauthPort};
 use oauth2::GoogleOauth2;
 
-pub struct OauthAdapter;
+pub struct OauthRepository;
 
-impl OauthRepository for OauthAdapter {
+impl OauthPort for OauthRepository {
     fn new_pkce(&self) -> Result<outbound::Pkce, Error> {
         let pkce = GoogleOauth2::new(
             crate::GOOGLE_CLIENT_ID,

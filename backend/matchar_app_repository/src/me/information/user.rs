@@ -1,19 +1,19 @@
 use database::ConnectionPool;
-use matchar_app_service::me::information::{outbound, Error, UserRepository};
+use matchar_app_service::me::information::{outbound, Error, UserPort};
 use refinement::{ImageUrl, UserId, UserName};
 use std::str::FromStr;
 
-pub struct UserAdapter {
+pub struct UserRepository {
     pool: ConnectionPool,
 }
 
-impl UserAdapter {
+impl UserRepository {
     pub const fn new(pool: ConnectionPool) -> Self {
         Self { pool }
     }
 }
 
-impl UserRepository for UserAdapter {
+impl UserPort for UserRepository {
     async fn find_by_session_id(
         &self,
         session_id: refinement::SessionId,

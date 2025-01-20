@@ -1,16 +1,16 @@
 use database::ConnectionPool;
-use matchar_app_service::auth::google_callback::{inbound, outbound, Error, PkceRepository};
+use matchar_app_service::auth::google_callback::{inbound, outbound, Error, PkcePort};
 use oauth2::{AccessToken, GoogleOauth2};
 use refinement::{EmailAddress, ImageUrl, PkceId, UserName};
 use std::str::FromStr;
 use time::{OffsetDateTime, PrimitiveDateTime};
 
-pub struct PkceAdapter {
+pub struct PkceRepository {
     pool: ConnectionPool,
     pkce: GoogleOauth2,
 }
 
-impl PkceAdapter {
+impl PkceRepository {
     pub fn new(pool: ConnectionPool) -> Result<Self, Error> {
         let pkce = GoogleOauth2::new(
             crate::GOOGLE_CLIENT_ID,
@@ -23,7 +23,7 @@ impl PkceAdapter {
     }
 }
 
-impl PkceRepository for PkceAdapter {
+impl PkcePort for PkceRepository {
     type AccessToken = AccessToken;
 
     async fn find_by_csrf_token(

@@ -1,13 +1,13 @@
 use super::{outbound, Error};
 use refinement::SessionId;
 
-pub trait Repository: Sync + Send + 'static {
-    type User: UserRepository;
+pub trait Port: Sync + Send + 'static {
+    type User: UserPort;
 
     fn user(&self) -> &Self::User;
 }
 
-pub trait UserRepository {
+pub trait UserPort {
     async fn find_by_session_id(
         &self,
         session_id: SessionId,
