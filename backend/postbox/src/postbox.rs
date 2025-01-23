@@ -73,6 +73,7 @@ impl<A: Actor> Postbox<A> {
             .await
             .map_err(|_| PostboxError::Send)?;
         let response = rx.await.map_err(|_| PostboxError::Recv)?;
+
         Ok(response)
     }
 
@@ -81,9 +82,11 @@ impl<A: Actor> Postbox<A> {
         A: Handler<M, Response = M::Response>,
         M: Message,
     {
+        let (tx, _) = oneshot::channel::<M::Response>();
         self.poster
             .try_send(Pack(Box::new(Post(Some(InnerPost { tx, message })))))
             .map_err(|_| PostboxError::Send)?;
+
         Ok(())
     }
 

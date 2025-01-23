@@ -53,9 +53,11 @@ impl<A: Actor> Context<A> {
 
     pub async fn tell<M: Message>(&mut self, message: M) -> PostboxResult<()>
     where
-        A: Handler<M, Response = ()>,
+        A: Handler<M, Response = M::Response>,
     {
-        self.postbox.tell(message).await
+        self.postbox.tell(message)?;
+
+        Ok(())
     }
 
     #[inline]

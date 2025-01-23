@@ -157,8 +157,9 @@ new_id! {
     UserId -> "user_",
     SessionId -> "session_",
     IdentityProviderId -> "credential_",
-    ServerId -> "server_",
+    ChannelId -> "channel_",
     RoomId -> "room_",
+    PlayerId -> "player_",
 }
 
 impl IdentityProviderId {

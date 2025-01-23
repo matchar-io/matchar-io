@@ -2,7 +2,6 @@
 resolver = "2"
 members = [
   "backend/database",
-  "backend/matchar_app_actor",
   "backend/matchar_app_backend",
   "backend/matchar_app_repository",
   "backend/matchar_app_service",

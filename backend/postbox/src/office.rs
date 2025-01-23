@@ -37,37 +37,3 @@ impl PostOffice {
         Broadcast::new(self.registry.iter_actor())
     }
 }
-
-async fn foo() {
-    struct MyActor;
-
-    #[derive(Clone)]
-    struct MyMessage;
-
-    impl Actor for MyActor {
-        //
-    }
-
-    impl crate::Message for MyMessage {
-        type Response = ();
-    }
-
-    #[async_trait]
-    impl crate::Handler<MyMessage> for MyActor {
-        type Response = ();
-
-        async fn handle(
-            &mut self,
-            _message: MyMessage,
-            context: &mut crate::Context<Self>,
-        ) -> Self::Response {
-            ()
-        }
-    }
-
-    let mut post_office = PostOffice::new();
-    let postbox = post_office.spawn(MyActor);
-    let _ = postbox.ask(MyMessage).await;
-    let broadcast = post_office.broadcast::<MyActor>();
-    let _ = broadcast.ask(MyMessage).await;
-}
