@@ -1,5 +1,4 @@
 #![allow(async_fn_in_trait)]
-// #![allow(unused)]
 
 #[macro_use]
 extern crate serde;
@@ -13,3 +12,7 @@ pub mod game;
 pub mod me;
 pub mod room;
 pub mod user;
+
+mod common;
+
+use common::*;

@@ -16,11 +16,11 @@ impl Emitter {
         Self { tx }
     }
 
-    pub async fn emit<T>(&self, payload: T) -> Result<(), EmitterError>
+    pub async fn emit<P>(&self, r#type: &'static str, payload: P) -> Result<(), EmitterError>
     where
-        T: serde::Serialize,
+        P: serde::Serialize,
     {
-        let message = Message::new(payload).map_err(EmitterError::Serialization)?;
+        let message = Message::new(r#type, payload).map_err(EmitterError::Serialization)?;
         self.tx.send(message).await.map_err(EmitterError::Send)?;
 
         Ok(())

@@ -1,11 +1,16 @@
-use crate::{game::domain::config::GameConfig, user::UserPostbox};
-use postbox::{Actor, Postbox};
-use refinement::{Item, Pool, RoomId, UserId};
+use crate::{
+    actor::Pool,
+    game::domain::config::GameConfig,
+    user::domain::{User, UserPostbox},
+};
+use postbox::Actor;
+use refinement::{RoomId, UserId};
 
-#[derive(Clone)]
-pub struct RoomPostbox {
-    pub(crate) postbox: Postbox<Room>,
-}
+pub type RoomPostbox = crate::common::actor::Postbox<Room>;
+
+pub type RoomCommand = crate::common::actor::Command<Room>;
+
+pub type RoomEvent = crate::common::actor::Event<Room>;
 
 /// 방
 pub struct Room {
@@ -20,36 +25,9 @@ pub struct Room {
     /// 방장 ID
     pub(crate) host_id: UserId,
     /// 플레이어 목록
-    pub(crate) players: Pool<UserPostbox>,
+    pub(crate) players: Pool<User>,
     /// 게임 설정
     pub(crate) config: GameConfig,
-}
-
-pub enum RoomError {
-    NotFoundHost,
-}
-
-impl RoomPostbox {
-    #[inline]
-    pub const fn room_id(&self) -> RoomId {
-        RoomId::new_unchecked(self.postbox.id())
-    }
-}
-
-impl From<Postbox<Room>> for RoomPostbox {
-    #[inline]
-    fn from(postbox: Postbox<Room>) -> Self {
-        Self { postbox }
-    }
-}
-
-impl Item for RoomPostbox {
-    type Id = RoomId;
-
-    #[inline]
-    fn id(&self) -> Self::Id {
-        self.room_id()
-    }
 }
 
 impl Room {
@@ -67,7 +45,7 @@ impl Room {
             name,
             password,
             late_entry,
-            host_id: host.user_id(),
+            host_id: host.id(),
             players: Pool::from_iter(max_len, [host])?,
             config,
         })
@@ -85,5 +63,10 @@ impl Room {
 }
 
 impl Actor for Room {
-    //
+    type Id = RoomId;
+
+    #[inline]
+    fn id(&self) -> Self::Id {
+        self.room_id
+    }
 }

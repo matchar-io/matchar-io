@@ -1,3 +1,3 @@
-pub mod postbox;
+pub mod entity;
 
-pub use postbox::*;
+pub use entity::*;

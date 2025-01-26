@@ -1,19 +1,25 @@
 pub struct Message {
+    pub r#type: &'static str,
     pub payload: String,
 }
 
 impl Message {
-    pub(crate) fn new<T>(payload: T) -> Result<Self, serde_json::Error>
+    pub(crate) fn new<P>(r#type: &'static str, payload: P) -> Result<Self, serde_json::Error>
     where
-        T: serde::Serialize,
+        P: serde::Serialize,
     {
         let payload = serde_json::to_string(&payload)?;
 
-        Ok(Self { payload })
+        Ok(Self { r#type, payload })
     }
 
     #[inline]
-    pub fn as_str(&self) -> &str {
+    pub fn r#type(&self) -> &'static str {
+        self.r#type
+    }
+
+    #[inline]
+    pub fn payload(&self) -> &str {
         &self.payload
     }
 }

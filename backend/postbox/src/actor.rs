@@ -1,12 +1,17 @@
 use crate::{Postbox, PostboxResult, Registry};
 use std::sync::Arc;
 use tokio_util::sync::WaitForCancellationFuture;
+use uuid::Uuid;
 
 #[async_trait]
 #[allow(unused_variables)]
 pub trait Actor: Sized + Sync + Send + 'static {
+    type Id: Copy + Eq + std::hash::Hash + From<Uuid>;
+
     const BUFFER_SIZE: usize = 256;
     const BATCH_SIZE: usize = 16;
+
+    fn id(&self) -> Self::Id;
 
     async fn started(&mut self, context: &mut Context<Self>) {
         //

@@ -3,10 +3,11 @@ use postbox::{Actor, Postbox};
 use refinement::GameId;
 use std::collections::HashSet;
 
-#[derive(Clone)]
-pub struct WordChainGamePostbox {
-    pub(crate) postbox: Postbox<WordChainGame>,
-}
+pub type WordChainGamePostbox = Postbox<WordChainGame>;
+
+pub type WordChainGameCommand = crate::common::actor::Command<WordChainGame>;
+
+pub type WordChainGameEvent = crate::common::actor::Event<WordChainGame>;
 
 /// 끝말잇기 게임
 pub struct WordChainGame {
@@ -40,20 +41,6 @@ pub struct WordChainAttributes {
     pub(crate) freshman: bool,
 }
 
-impl WordChainGamePostbox {
-    #[inline]
-    pub const fn game_id(&self) -> GameId {
-        GameId::new_unchecked(self.postbox.id())
-    }
-}
-
-impl From<Postbox<WordChainGame>> for WordChainGamePostbox {
-    #[inline]
-    fn from(postbox: Postbox<WordChainGame>) -> Self {
-        Self { postbox }
-    }
-}
-
 impl WordChainGame {
     pub fn new(
         game_id: GameId,
@@ -71,7 +58,12 @@ impl WordChainGame {
 }
 
 impl Actor for WordChainGame {
-    //
+    type Id = GameId;
+
+    #[inline]
+    fn id(&self) -> Self::Id {
+        self.game_id
+    }
 }
 
 impl WordChainAttributes {
