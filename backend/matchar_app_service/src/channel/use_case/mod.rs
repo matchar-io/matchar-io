@@ -1,2 +1,2 @@
-pub mod chat_in_channel;
-pub mod enter_channel;
+pub mod chat;
+pub mod enter;
