@@ -1,5 +1,6 @@
 use super::config::{Attribute, MaxRound, MaxTimeout};
-use postbox::Postbox;
+use postbox::{Actor, Postbox};
+use refinement::GameId;
 use std::collections::HashSet;
 
 #[derive(Clone)]
@@ -8,6 +9,7 @@ pub struct WordChainGamePostbox {
 }
 
 pub struct WordChainGame {
+    pub(crate) game_id: GameId,
     pub(crate) max_round: MaxRound,
     pub(crate) max_timeout: MaxTimeout,
     pub(crate) attributes: WordChainAttributes,
@@ -26,8 +28,8 @@ pub struct WordChainAttributes {
 
 impl WordChainGamePostbox {
     #[inline]
-    pub const fn game_id(&self) -> u64 {
-        self.postbox.id()
+    pub const fn game_id(&self) -> GameId {
+        GameId::new_unchecked(self.postbox.id())
     }
 }
 
@@ -40,16 +42,22 @@ impl From<Postbox<WordChainGame>> for WordChainGamePostbox {
 
 impl WordChainGame {
     pub fn new(
+        game_id: GameId,
         max_round: MaxRound,
         max_timeout: MaxTimeout,
         attributes: HashSet<Attribute>,
     ) -> Self {
         Self {
+            game_id,
             max_round,
             max_timeout,
             attributes: WordChainAttributes::new(attributes),
         }
     }
+}
+
+impl Actor for WordChainGame {
+    //
 }
 
 impl WordChainAttributes {
