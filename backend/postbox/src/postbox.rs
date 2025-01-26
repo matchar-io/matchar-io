@@ -19,7 +19,7 @@ pub struct Postbox<A: Actor> {
 }
 
 struct InnerPost<M: Message> {
-    tx: oneshot::Sender<M::Response>,
+    tx: Option<oneshot::Sender<M::Response>>,
     message: M,
 }
 
@@ -58,7 +58,7 @@ impl<A: Actor> Postbox<A> {
     }
 
     #[inline]
-    pub fn id(&self) -> Uuid {
+    pub const fn id(&self) -> Uuid {
         self.id
     }
 
@@ -68,8 +68,12 @@ impl<A: Actor> Postbox<A> {
         M: Message,
     {
         let (tx, rx) = oneshot::channel::<M::Response>();
+        let pack = Pack(Box::new(Post(Some(InnerPost {
+            tx: Some(tx),
+            message,
+        }))));
         self.poster
-            .send(Pack(Box::new(Post(Some(InnerPost { tx, message })))))
+            .send(pack)
             .await
             .map_err(|_| PostboxError::Send)?;
         let response = rx.await.map_err(|_| PostboxError::Recv)?;
@@ -82,10 +86,8 @@ impl<A: Actor> Postbox<A> {
         A: Handler<M, Response = M::Response>,
         M: Message,
     {
-        let (tx, _) = oneshot::channel::<M::Response>();
-        self.poster
-            .try_send(Pack(Box::new(Post(Some(InnerPost { tx, message })))))
-            .map_err(|_| PostboxError::Send)?;
+        let pack = Pack(Box::new(Post(Some(InnerPost { tx: None, message }))));
+        self.poster.try_send(pack).map_err(|_| PostboxError::Send)?;
 
         Ok(())
     }
@@ -171,8 +173,10 @@ where
     async fn deliver(&mut self, actor: &mut A, context: &mut Context<A>) {
         if let Some(InnerPost { tx, message }) = self.0.take() {
             let response = actor.handle(message, context).await;
-            if let Err(response) = tx.send(response) {
-                actor.on_fail_response(response);
+            if let Some(tx) = tx {
+                if let Err(response) = tx.send(response) {
+                    actor.on_fail_response(response);
+                }
             }
         }
     }
