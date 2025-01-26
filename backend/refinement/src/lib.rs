@@ -7,6 +7,7 @@ extern crate thiserror;
 pub mod datetime;
 pub mod email_address;
 pub mod id;
+pub mod registry;
 pub mod url;
 pub mod user_name;
 
@@ -15,6 +16,7 @@ mod shared;
 pub use datetime::*;
 pub use email_address::*;
 pub use id::*;
+pub use registry::*;
 pub use url::*;
 pub use user_name::*;
 

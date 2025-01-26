@@ -4,7 +4,7 @@ use tokio_util::sync::WaitForCancellationFuture;
 
 #[async_trait]
 #[allow(unused_variables)]
-pub trait Actor: Sized + Send + 'static {
+pub trait Actor: Sized + Sync + Send + 'static {
     const BUFFER_SIZE: usize = 256;
     const BATCH_SIZE: usize = 16;
 
@@ -21,7 +21,7 @@ pub trait Actor: Sized + Send + 'static {
     }
 }
 
-pub trait Message: Sized + Send + 'static {
+pub trait Message: Sized + Sync + Send + 'static {
     type Response: Send + 'static;
 }
 

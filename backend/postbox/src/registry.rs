@@ -1,8 +1,11 @@
 use crate::{Actor, Postbox};
-use std::{any::TypeId, collections::HashMap};
+use std::{
+    any::{Any, TypeId},
+    collections::HashMap,
+};
 use uuid::Uuid;
 
-type DynamicPostbox = Box<dyn std::any::Any + Send + Sync>;
+type DynamicPostbox = Box<dyn Any + Send + Sync>;
 
 pub struct Registry {
     map: HashMap<TypeId, HashMap<Uuid, DynamicPostbox>>,
