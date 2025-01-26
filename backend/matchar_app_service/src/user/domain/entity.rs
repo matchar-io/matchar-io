@@ -1,11 +1,11 @@
 use postbox::Actor;
 use refinement::UserId;
 
-pub type UserPostbox = crate::common::actor::Postbox<User>;
+pub type UserPostbox = crate::common::postbox::Postbox<User>;
 
-pub type UserCommand = crate::common::actor::Command<User>;
+pub type UserCommand = crate::common::postbox::Command<User>;
 
-pub type UserEvent = crate::common::actor::Event<User>;
+pub type UserEvent = crate::common::postbox::Event<User>;
 
 /// 유저
 pub struct User {

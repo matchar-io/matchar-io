@@ -1,16 +1,16 @@
 use crate::{
-    actor::Pool,
+    common::postbox::Pool,
     game::domain::config::GameConfig,
     user::domain::{User, UserPostbox},
 };
 use postbox::Actor;
 use refinement::{RoomId, UserId};
 
-pub type RoomPostbox = crate::common::actor::Postbox<Room>;
+pub type RoomPostbox = crate::common::postbox::Postbox<Room>;
 
-pub type RoomCommand = crate::common::actor::Command<Room>;
+pub type RoomCommand = crate::common::postbox::Command<Room>;
 
-pub type RoomEvent = crate::common::actor::Event<Room>;
+pub type RoomEvent = crate::common::postbox::Event<Room>;
 
 /// 방
 pub struct Room {

@@ -1,12 +1,12 @@
-use crate::{actor::Pool, room::domain::Room, user::domain::User};
+use crate::{common::postbox::Pool, room::domain::Room, user::domain::User};
 use postbox::Actor;
 use refinement::ChannelId;
 
-pub type ChannelPostbox = crate::common::actor::Postbox<Channel>;
+pub type ChannelPostbox = crate::common::postbox::Postbox<Channel>;
 
-pub type ChannelCommand = crate::common::actor::Command<Channel>;
+pub type ChannelCommand = crate::common::postbox::Command<Channel>;
 
-pub type ChannelEvent = crate::common::actor::Event<Channel>;
+pub type ChannelEvent = crate::common::postbox::Event<Channel>;
 
 /// 채널
 pub struct Channel {

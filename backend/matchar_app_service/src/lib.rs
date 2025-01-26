@@ -14,5 +14,3 @@ pub mod room;
 pub mod user;
 
 mod common;
-
-use common::*;

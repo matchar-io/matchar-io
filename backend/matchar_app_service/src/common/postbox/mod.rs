@@ -24,17 +24,15 @@ where
     }
 
     #[inline]
-    pub(crate) fn id(&self) -> A::Id {
+    pub fn id(&self) -> A::Id {
         self.postbox.id().into()
     }
 
-    #[inline]
     pub fn command(&self) -> Command<A> {
         self.postbox.clone().into()
     }
 
-    #[inline]
-    pub(crate) fn event(&self) -> Event<A> {
+    pub fn event(&self) -> Event<A> {
         self.postbox.clone().into()
     }
 }

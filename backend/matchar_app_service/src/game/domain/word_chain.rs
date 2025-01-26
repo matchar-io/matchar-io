@@ -1,13 +1,13 @@
 use super::config::{Attribute, MaxRound, MaxTimeout};
-use postbox::{Actor, Postbox};
+use postbox::Actor;
 use refinement::GameId;
 use std::collections::HashSet;
 
-pub type WordChainGamePostbox = Postbox<WordChainGame>;
+pub type WordChainGamePostbox = crate::common::postbox::Postbox<WordChainGame>;
 
-pub type WordChainGameCommand = crate::common::actor::Command<WordChainGame>;
+pub type WordChainGameCommand = crate::common::postbox::Command<WordChainGame>;
 
-pub type WordChainGameEvent = crate::common::actor::Event<WordChainGame>;
+pub type WordChainGameEvent = crate::common::postbox::Event<WordChainGame>;
 
 /// 끝말잇기 게임
 pub struct WordChainGame {
