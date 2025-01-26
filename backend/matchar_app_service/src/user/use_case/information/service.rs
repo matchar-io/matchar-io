@@ -1,7 +1,7 @@
 use super::{inbound, outbound, Port, UserPort};
 
 pub trait UseCase {
-    async fn me_information(&self, data: inbound::Data) -> Result<outbound::Data, Error>;
+    async fn user_information(&self, data: inbound::Data) -> Result<outbound::Data, Error>;
 }
 
 pub struct Service<P> {
@@ -12,10 +12,6 @@ pub struct Service<P> {
 pub enum Error {
     #[error("No matched")]
     NoMatched,
-    #[error("User is deactivated")]
-    Deactivated,
-    #[error("User is locked")]
-    Locked,
 
     #[error("Database error: {0}")]
     DatabaseError(anyhow::Error),
@@ -31,13 +27,13 @@ impl<P> UseCase for Service<P>
 where
     P: Port,
 {
-    async fn me_information(
+    async fn user_information(
         &self,
-        inbound::Data { session_id, now }: inbound::Data,
+        inbound::Data { user_id, now }: inbound::Data,
     ) -> Result<outbound::Data, Error> {
-        let user = match self.port.user().find_by_session_id(session_id).await? {
-            Some(user) if user.deactivated_at < now => return Err(Error::Deactivated),
-            Some(user) if user.locked_at < now => return Err(Error::Locked),
+        let user = match self.port.user().find_by_user_id(user_id).await? {
+            Some(user) if user.deactivated_at < now => return Err(Error::NoMatched),
+            Some(user) if user.locked_at < now => return Err(Error::NoMatched),
             Some(user) => user,
             None => return Err(Error::NoMatched),
         };
