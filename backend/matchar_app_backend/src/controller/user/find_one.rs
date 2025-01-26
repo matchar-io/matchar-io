@@ -1,8 +1,8 @@
 use crate::Session;
 use axum::{extract::Query, http::StatusCode, response::IntoResponse, Extension, Json};
 use database::ConnectionPool;
-use matchar_app_repository::user::information::Repository;
-use matchar_app_service::user::information::{inbound, outbound, Error, Service, UseCase};
+use matchar_app_repository::user::find_one::Repository;
+use matchar_app_service::user::find_one::{inbound, outbound, Error, Service, UseCase};
 use refinement::{ImageUrl, UserId, UserName};
 
 #[derive(Deserialize)]
@@ -41,7 +41,7 @@ pub async fn handler(
         name,
         image_url,
     } = Service::new(repository)
-        .user_information(data)
+        .find_one(data)
         .await
         .map_err(ErrorKind::Service)?;
     let user = User {

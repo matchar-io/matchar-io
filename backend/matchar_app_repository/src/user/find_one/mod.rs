@@ -1,7 +1,7 @@
 mod user;
 
 use database::ConnectionPool;
-use matchar_app_service::me::information::Port;
+use matchar_app_service::user::find_one::Port;
 
 pub struct Repository {
     user: user::UserRepository,

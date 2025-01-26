@@ -1,5 +1,5 @@
 use database::ConnectionPool;
-use matchar_app_service::me::information::{outbound, Error, UserPort};
+use matchar_app_service::me::find_one::{outbound, Error, UserPort};
 use refinement::{ImageUrl, UserId, UserName};
 use std::str::FromStr;
 
