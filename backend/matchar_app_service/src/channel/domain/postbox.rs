@@ -7,10 +7,13 @@ pub struct ChannelPostbox {
     pub(crate) postbox: Postbox<Channel>,
 }
 
+/// 채널
 pub(crate) struct Channel {
+    /// 채널 ID
     pub(crate) channel_id: ChannelId,
-    pub(crate) name: String,
+    /// 유저 목록
     pub(crate) users: Pool<UserPostbox>,
+    /// 방 목록
     pub(crate) rooms: Pool<RoomPostbox>,
 }
 
@@ -33,10 +36,9 @@ impl Actor for Channel {
 }
 
 impl Channel {
-    pub fn new(channel_id: ChannelId, name: String) -> Self {
+    pub fn new(channel_id: ChannelId) -> Self {
         Self {
             channel_id,
-            name,
             users: Pool::new(1000),
             rooms: Pool::new(125),
         }

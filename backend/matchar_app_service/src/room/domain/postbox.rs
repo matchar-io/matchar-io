@@ -7,6 +7,7 @@ pub struct RoomPostbox {
     pub(crate) postbox: Postbox<Room>,
 }
 
+/// 방
 pub struct Room {
     /// 방 ID
     pub(crate) room_id: RoomId,

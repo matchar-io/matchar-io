@@ -6,9 +6,11 @@ pub struct UserPostbox {
     pub(crate) postbox: Postbox<User>,
 }
 
+/// 유저
 pub struct User {
+    /// 유저 ID
     pub(crate) user_id: UserId,
-    pub(crate) name: String,
+    /// 이벤트 발행자
     pub(crate) emitter: tunnel::Emitter,
 }
 
@@ -36,12 +38,8 @@ impl Item for UserPostbox {
 }
 
 impl User {
-    pub fn new(user_id: UserId, name: String, emitter: tunnel::Emitter) -> Self {
-        Self {
-            user_id,
-            name,
-            emitter,
-        }
+    pub fn new(user_id: UserId, emitter: tunnel::Emitter) -> Self {
+        Self { user_id, emitter }
     }
 }
 
