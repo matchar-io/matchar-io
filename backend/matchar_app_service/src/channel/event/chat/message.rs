@@ -1,5 +1,5 @@
-use crate::channel::domain::ChannelCommand;
-use postbox::{Message, PostboxError};
+use crate::channel::domain::ChannelEvent;
+use postbox::{Message, PostboxResult};
 use refinement::{UserId, UserName};
 
 pub struct ChatEvent {
@@ -12,19 +12,12 @@ pub struct User {
     pub(crate) name: UserName,
 }
 
-pub enum ChatEventError {
-    Postbox(PostboxError),
-}
-
-impl ChannelCommand {
-    pub async fn chat(&self, user: User, message: String) -> <ChatEvent as Message>::Response {
-        match self.ask(ChatEvent { user, message }).await {
-            Ok(response) => response,
-            Err(error) => Err(ChatEventError::Postbox(error)),
-        }
+impl ChannelEvent {
+    pub fn chat(&self, user: User, message: String) -> <ChatEvent as Message>::Response {
+        self.tell(ChatEvent { user, message })
     }
 }
 
 impl Message for ChatEvent {
-    type Response = Result<(), ChatEventError>;
+    type Response = PostboxResult<()>;
 }

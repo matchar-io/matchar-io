@@ -1,14 +1,14 @@
-use postbox::Postbox;
+use postbox::{Actor, Postbox};
 use refinement::UserId;
 
 #[derive(Clone)]
-pub struct Command<A: postbox::Actor> {
+pub struct Command<A: Actor> {
     postbox: Postbox<A>,
 }
 
 impl<A> Command<A>
 where
-    A: postbox::Actor,
+    A: Actor,
 {
     pub fn new(postbox: Postbox<A>) -> Self {
         Self { postbox }
@@ -22,7 +22,7 @@ where
 
 impl<A> std::ops::Deref for Command<A>
 where
-    A: postbox::Actor,
+    A: Actor,
 {
     type Target = Postbox<A>;
 
@@ -34,7 +34,7 @@ where
 
 impl<A> From<Postbox<A>> for Command<A>
 where
-    A: postbox::Actor,
+    A: Actor,
 {
     #[inline]
     fn from(postbox: Postbox<A>) -> Self {

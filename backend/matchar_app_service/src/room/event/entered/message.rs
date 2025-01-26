@@ -1,10 +1,10 @@
 use crate::room::domain::RoomEvent;
-use postbox::{Message, PostboxError};
+use postbox::{Message, PostboxResult};
 use refinement::{RoomId, UserId, UserName};
 
 pub struct EnteredEvent {
-    pub(crate) room_id: RoomId,
     pub(crate) user: User,
+    pub(crate) room_id: RoomId,
 }
 
 pub struct User {
@@ -12,19 +12,12 @@ pub struct User {
     pub(crate) name: UserName,
 }
 
-pub enum EnteredEventError {
-    Postbox(PostboxError),
-}
-
 impl RoomEvent {
-    pub async fn enter(&self, room_id: RoomId, user: User) -> <EnteredEvent as Message>::Response {
-        match self.postbox.ask(EnteredEvent { room_id, user }).await {
-            Ok(response) => response,
-            Err(error) => Err(EnteredEventError::Postbox(error)),
-        }
+    pub fn enter(&self, user: User, room_id: RoomId) -> <EnteredEvent as Message>::Response {
+        self.tell(EnteredEvent { user, room_id })
     }
 }
 
 impl Message for EnteredEvent {
-    type Response = Result<(), EnteredEventError>;
+    type Response = PostboxResult<()>;
 }

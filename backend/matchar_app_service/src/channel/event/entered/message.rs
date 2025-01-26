@@ -1,5 +1,5 @@
 use crate::channel::domain::ChannelEvent;
-use postbox::{Message, PostboxError};
+use postbox::{Message, PostboxResult};
 use refinement::ChannelId;
 
 pub struct EnteredEvent {
@@ -7,23 +7,16 @@ pub struct EnteredEvent {
     pub(crate) count: usize,
 }
 
-pub enum EnteredEventError {
-    Postbox(PostboxError),
-}
-
 impl ChannelEvent {
-    pub async fn enter(
+    pub fn enter(
         &self,
         channel_id: ChannelId,
         count: usize,
     ) -> <EnteredEvent as Message>::Response {
-        match self.postbox.ask(EnteredEvent { channel_id, count }).await {
-            Ok(response) => response,
-            Err(error) => Err(EnteredEventError::Postbox(error)),
-        }
+        self.tell(EnteredEvent { channel_id, count })
     }
 }
 
 impl Message for EnteredEvent {
-    type Response = Result<(), EnteredEventError>;
+    type Response = PostboxResult<()>;
 }

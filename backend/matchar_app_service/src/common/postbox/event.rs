@@ -1,16 +1,25 @@
-use postbox::Postbox;
+use postbox::{Actor, Postbox};
 
 #[derive(Clone)]
 pub struct Event<A>
 where
-    A: postbox::Actor,
+    A: Actor,
 {
-    pub(crate) postbox: Postbox<A>,
+    postbox: Postbox<A>,
+}
+
+impl<A> Event<A>
+where
+    A: Actor,
+{
+    pub fn new(postbox: Postbox<A>) -> Self {
+        Self { postbox }
+    }
 }
 
 impl<A> std::ops::Deref for Event<A>
 where
-    A: postbox::Actor,
+    A: Actor,
 {
     type Target = Postbox<A>;
 
@@ -22,7 +31,7 @@ where
 
 impl<A> From<Postbox<A>> for Event<A>
 where
-    A: postbox::Actor,
+    A: Actor,
 {
     #[inline]
     fn from(postbox: Postbox<A>) -> Self {

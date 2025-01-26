@@ -19,6 +19,19 @@ impl Event for Payload {
     const TYPE: &'static str = "room.entered";
 }
 
+impl From<EnteredEvent> for Payload {
+    #[inline]
+    fn from(EnteredEvent { user, room_id }: EnteredEvent) -> Self {
+        Payload {
+            room_id: room_id,
+            user: User {
+                user_id: user.user_id,
+                name: user.name,
+            },
+        }
+    }
+}
+
 #[postbox::async_trait]
 impl Handler<EnteredEvent> for Room {
     type Response = <EnteredEvent as Message>::Response;
@@ -30,18 +43,5 @@ impl Handler<EnteredEvent> for Room {
         }
 
         Ok(())
-    }
-}
-
-impl From<EnteredEvent> for Payload {
-    #[inline]
-    fn from(EnteredEvent { room_id, user }: EnteredEvent) -> Self {
-        Payload {
-            room_id,
-            user: User {
-                user_id: user.user_id,
-                name: user.name,
-            },
-        }
     }
 }
