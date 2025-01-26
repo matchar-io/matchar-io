@@ -3,8 +3,6 @@ use std::collections::HashMap;
 pub trait Storable {
     type Id: Copy + Eq + std::hash::Hash;
 
-    const MAX_LEN: usize;
-
     fn id(&self) -> Self::Id;
 }
 
@@ -15,8 +13,11 @@ pub struct Registry<Item: Storable> {
 
 impl<Item: Storable> Registry<Item> {
     #[inline]
-    pub fn new() -> Self {
-        Default::default()
+    pub fn new(max_len: usize) -> Self {
+        Self {
+            max_len,
+            items: HashMap::new(),
+        }
     }
 
     #[inline]
@@ -67,14 +68,5 @@ impl<Item: Storable> Registry<Item> {
     #[inline]
     pub fn iter(&self) -> impl Iterator<Item = (&Item::Id, &Item)> {
         self.items.iter()
-    }
-}
-
-impl<Item: Storable> Default for Registry<Item> {
-    fn default() -> Self {
-        Self {
-            max_len: Item::MAX_LEN,
-            items: HashMap::new(),
-        }
     }
 }
