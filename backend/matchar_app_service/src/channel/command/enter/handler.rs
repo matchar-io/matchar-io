@@ -4,13 +4,13 @@ use postbox::{Context, Handler, Message};
 
 #[postbox::async_trait]
 impl Handler<EnterCommand> for Channel {
-    type Response = <EnterCommand as Message>::Response;
+    type Executed = <EnterCommand as Message>::Executed;
 
-    async fn handle(
+    async fn on_execute(
         &mut self,
         EnterCommand { user_id }: EnterCommand,
         context: &mut Context<Self>,
-    ) -> Self::Response {
+    ) -> Self::Executed {
         let user = context
             .registry
             .get(user_id.as_uuid())

@@ -2,10 +2,12 @@ use crate::channel::domain::ChannelEvent;
 use postbox::{Message, PostboxResult};
 use refinement::RoomId;
 
+#[derive(Clone)]
 pub struct RoomCountUpdatedEvent {
     pub(crate) room: Room,
 }
 
+#[derive(Clone)]
 pub struct Room {
     pub(crate) room_id: RoomId,
     pub(crate) count: usize,
@@ -16,7 +18,7 @@ impl ChannelEvent {
         &self,
         room_id: RoomId,
         count: usize,
-    ) -> <RoomCountUpdatedEvent as Message>::Response {
+    ) -> <RoomCountUpdatedEvent as Message>::Executed {
         self.tell(RoomCountUpdatedEvent {
             room: Room { room_id, count },
         })
@@ -24,5 +26,5 @@ impl ChannelEvent {
 }
 
 impl Message for RoomCountUpdatedEvent {
-    type Response = PostboxResult<()>;
+    type Executed = PostboxResult<()>;
 }

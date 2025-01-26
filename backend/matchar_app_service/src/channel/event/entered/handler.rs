@@ -15,9 +15,9 @@ impl Event for Payload {
 
 #[postbox::async_trait]
 impl Handler<EnteredEvent> for Channel {
-    type Response = <EnteredEvent as Message>::Response;
+    type Executed = <EnteredEvent as Message>::Executed;
 
-    async fn handle(&mut self, event: EnteredEvent, _: &mut Context<Self>) -> Self::Response {
+    async fn on_execute(&mut self, event: EnteredEvent, _: &mut Context<Self>) -> Self::Executed {
         let event = Payload::from(event);
         for lobby_user in self.lobby_users.values() {
             let _ = lobby_user.event().emit_event(event.clone());

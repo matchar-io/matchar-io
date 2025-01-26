@@ -19,7 +19,7 @@ pub struct Postbox<A: Actor> {
 }
 
 struct InnerPost<M: Message> {
-    tx: Option<oneshot::Sender<M::Response>>,
+    tx: Option<oneshot::Sender<M::Executed>>,
     message: M,
 }
 
@@ -33,7 +33,7 @@ struct Pack<A: Actor>(Box<dyn Delivery<A>>);
 
 struct Post<M: Message>(Option<InnerPost<M>>);
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub enum PostboxError {
     Send,
     Recv,
@@ -62,12 +62,12 @@ impl<A: Actor> Postbox<A> {
         self.id
     }
 
-    pub async fn ask<M>(&self, message: M) -> PostboxResult<M::Response>
+    pub async fn ask<M>(&self, message: M) -> PostboxResult<M::Executed>
     where
-        A: Handler<M, Response = M::Response>,
+        A: Handler<M, Executed = M::Executed>,
         M: Message,
     {
-        let (tx, rx) = oneshot::channel::<M::Response>();
+        let (tx, rx) = oneshot::channel();
         let pack = Pack(Box::new(Post(Some(InnerPost {
             tx: Some(tx),
             message,
@@ -83,7 +83,7 @@ impl<A: Actor> Postbox<A> {
 
     pub fn tell<M>(&self, message: M) -> PostboxResult<()>
     where
-        A: Handler<M, Response = M::Response>,
+        A: Handler<M, Executed = M::Executed>,
         M: Message,
     {
         let pack = Pack(Box::new(Post(Some(InnerPost { tx: None, message }))));
@@ -168,16 +168,18 @@ impl<A: Actor> PostboxWorker<A> {
 #[async_trait]
 impl<A: Actor, M: Message> Delivery<A> for Post<M>
 where
-    A: Handler<M, Response = M::Response>,
+    A: Handler<M, Executed = M::Executed>,
 {
     async fn deliver(&mut self, actor: &mut A, context: &mut Context<A>) {
         if let Some(InnerPost { tx, message }) = self.0.take() {
-            let response = actor.handle(message, context).await;
+            let executed = actor.on_execute(message.clone(), context).await;
             if let Some(tx) = tx {
-                if let Err(response) = tx.send(response) {
-                    actor.on_fail_response(response);
+                if let Err(executed) = tx.send(executed.clone()) {
+                    return actor.on_failed(executed).await;
                 }
             }
+
+            actor.on_executed(message, executed, context).await;
         }
     }
 }

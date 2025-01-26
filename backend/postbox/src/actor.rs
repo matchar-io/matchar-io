@@ -26,18 +26,28 @@ pub trait Actor: Sized + Sync + Send + 'static {
     }
 }
 
-pub trait Message: Sized + Sync + Send + 'static {
-    type Response: Send + 'static;
+pub trait Message: Clone + Sized + Sync + Send + 'static {
+    type Executed: Clone + Send + 'static;
 }
 
 #[async_trait]
 pub trait Handler<M: Message>: Actor {
-    type Response: Send + 'static;
+    type Executed: Clone + Send + 'static;
 
-    async fn handle(&mut self, message: M, context: &mut Context<Self>) -> Self::Response;
+    async fn on_execute(&mut self, message: M, context: &mut Context<Self>) -> Self::Executed;
 
     #[allow(unused_variables)]
-    fn on_fail_response(&mut self, response: Self::Response) {
+    async fn on_executed(
+        &mut self,
+        message: M,
+        executed: Self::Executed,
+        context: &mut Context<Self>,
+    ) {
+        //
+    }
+
+    #[allow(unused_variables)]
+    async fn on_failed(&mut self, response: M::Executed) {
         //
     }
 }
@@ -49,16 +59,16 @@ pub struct Context<A: Actor> {
 
 impl<A: Actor> Context<A> {
     #[inline]
-    pub async fn ask<M: Message>(&mut self, message: M) -> PostboxResult<M::Response>
+    pub async fn ask<M: Message>(&mut self, message: M) -> PostboxResult<M::Executed>
     where
-        A: Handler<M, Response = M::Response>,
+        A: Handler<M, Executed = M::Executed>,
     {
         self.postbox.ask(message).await
     }
 
     pub async fn tell<M: Message>(&mut self, message: M) -> PostboxResult<()>
     where
-        A: Handler<M, Response = M::Response>,
+        A: Handler<M, Executed = M::Executed>,
     {
         self.postbox.tell(message)?;
 

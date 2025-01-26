@@ -24,8 +24,8 @@ where
 
     pub async fn ask<M>(self, message: M) -> PostboxResult<()>
     where
-        A: Handler<M, Response = M::Response>,
-        M: Message + Clone,
+        A: Handler<M, Executed = M::Executed>,
+        M: Message,
     {
         for postbox in self.iter {
             let _ = postbox.ask(message.clone()).await?;

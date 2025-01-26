@@ -32,13 +32,13 @@ impl From<RoomCountUpdatedEvent> for Payload {
 
 #[postbox::async_trait]
 impl Handler<RoomCountUpdatedEvent> for Channel {
-    type Response = <RoomCountUpdatedEvent as Message>::Response;
+    type Executed = <RoomCountUpdatedEvent as Message>::Executed;
 
-    async fn handle(
+    async fn on_execute(
         &mut self,
         event: RoomCountUpdatedEvent,
         _: &mut Context<Self>,
-    ) -> Self::Response {
+    ) -> Self::Executed {
         let event = Payload::from(event);
         for lobby_user in self.lobby_users.values() {
             let _ = lobby_user.event().emit_event(event.clone());

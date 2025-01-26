@@ -1,3 +1,4 @@
+#[derive(Clone)]
 pub struct Message {
     pub r#type: &'static str,
     pub payload: String,

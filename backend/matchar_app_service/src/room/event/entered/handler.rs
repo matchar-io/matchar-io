@@ -34,9 +34,9 @@ impl From<EnteredEvent> for Payload {
 
 #[postbox::async_trait]
 impl Handler<EnteredEvent> for Room {
-    type Response = <EnteredEvent as Message>::Response;
+    type Executed = <EnteredEvent as Message>::Executed;
 
-    async fn handle(&mut self, event: EnteredEvent, _: &mut Context<Self>) -> Self::Response {
+    async fn on_execute(&mut self, event: EnteredEvent, _: &mut Context<Self>) -> Self::Executed {
         let event = Payload::from(event);
         for user in self.players.values() {
             let _ = user.event().emit_event(event.clone());
