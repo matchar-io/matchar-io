@@ -9,6 +9,7 @@ extern crate thiserror;
 
 pub mod auth;
 pub mod channel;
+pub mod game;
 pub mod me;
 pub mod room;
 pub mod user;

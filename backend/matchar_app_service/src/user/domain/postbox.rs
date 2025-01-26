@@ -1,6 +1,7 @@
 use postbox::{Actor, Postbox};
-use refinement::{Storable, UserId};
+use refinement::{Item, UserId};
 
+#[derive(Clone)]
 pub struct UserPostbox {
     pub(crate) postbox: Postbox<User>,
 }
@@ -25,7 +26,7 @@ impl From<Postbox<User>> for UserPostbox {
     }
 }
 
-impl Storable for UserPostbox {
+impl Item for UserPostbox {
     type Id = UserId;
 
     #[inline]

@@ -1,7 +1,4 @@
-use crate::{
-    room::{Room, RoomPostbox},
-    user::User,
-};
+use crate::room::{Room, RoomPostbox};
 use postbox::{Context, Handler, Message, PostboxError};
 use refinement::UserId;
 

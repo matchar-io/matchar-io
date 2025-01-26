@@ -1,5 +1,6 @@
 use crate::{Actor, Broadcast, Postbox, Registry};
 use std::sync::Arc;
+use uuid::Uuid;
 
 pub struct PostOffice {
     registry: Arc<Registry>,
@@ -12,8 +13,8 @@ impl PostOffice {
         Self { registry }
     }
 
-    pub fn spawn<A: Actor>(&mut self, actor: A) -> Postbox<A> {
-        let (postbox, worker) = Postbox::create(actor);
+    pub fn spawn<A: Actor>(&mut self, id: Uuid, actor: A) -> Postbox<A> {
+        let (postbox, worker) = Postbox::create(id, actor);
         if let Some(registry) = Arc::get_mut(&mut self.registry) {
             registry.insert(postbox.clone());
         }

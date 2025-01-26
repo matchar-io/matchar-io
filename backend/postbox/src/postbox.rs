@@ -40,10 +40,10 @@ pub enum PostboxError {
 }
 
 impl<A: Actor> Postbox<A> {
-    pub(crate) fn create(actor: A) -> (Self, PostboxWorker<A>) {
+    pub(crate) fn create(id: Uuid, actor: A) -> (Self, PostboxWorker<A>) {
         let (poster, receiver) = mpsc::channel::<Pack<A>>(A::BUFFER_SIZE);
         let postbox = Self {
-            id: Uuid::now_v7(),
+            id,
             poster,
             cancellation: CancellationToken::new(),
             termination: CancellationToken::new(),
