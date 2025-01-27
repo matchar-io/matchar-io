@@ -34,7 +34,7 @@ macro_rules! new_id {
             fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
                 match self {
                     $(
-                        Id::$name(id) => write!(f, "{}{}", $prefix, id),
+                        Id::$name(id) => write!(f, "{}", id),
                     )+
                 }
             }
@@ -45,11 +45,8 @@ macro_rules! new_id {
 
             fn from_str(source: &str) -> Result<Self, Self::Err> {
                 $(
-                    if source.starts_with($prefix) {
-                        let source = &source[$prefix.len()..];
-                        let uuid = uuid::Uuid::parse_str(source).map_err(IdError::InvalidUuid)?;
-
-                        return Ok(Id::$name($name(uuid)));
+                    if let Ok(id) = source.parse() {
+                        return Ok(Id::$name(id));
                     }
                 )+
 
