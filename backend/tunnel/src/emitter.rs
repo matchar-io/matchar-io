@@ -17,13 +17,16 @@ impl Emitter {
         Self { tx }
     }
 
-    pub async fn emit<P>(&self, r#type: &'static str, payload: P) -> Result<(), EmitterError>
+    pub async fn event<P>(&self, r#type: &'static str, payload: P) -> Result<(), EmitterError>
     where
         P: serde::Serialize,
     {
-        let message = Message::new(r#type, payload).map_err(|_| EmitterError::Serialization)?;
-        self.tx.send(message).await.map_err(EmitterError::Send)?;
+        let message = Message::event(r#type, payload).map_err(|_| EmitterError::Serialization)?;
+        self.tx.send(message).await.map_err(EmitterError::Send)
+    }
 
-        Ok(())
+    pub async fn close(&self) -> Result<(), EmitterError> {
+        let message = Message::Close;
+        self.tx.send(message).await.map_err(EmitterError::Send)
     }
 }

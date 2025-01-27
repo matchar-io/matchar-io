@@ -9,14 +9,17 @@ anyhow = { workspace = true }
 axum = { workspace = true }
 axum-extra = { workspace = true }
 database = { path = "../database" }
+futures = { workspace = true }
 jsonwebtoken = { workspace = true }
 matchar_app_repository = { path = "../matchar_app_repository" }
 matchar_app_service = { path = "../matchar_app_service" }
+postbox = { path = "../postbox" }
 refinement = { path = "../refinement" }
 serde = { workspace = true }
 thiserror = { workspace = true }
 time = { workspace = true }
 tokio = { workspace = true }
+tunnel = { path = "../tunnel" }
 url = { workspace = true }
 
 [build-dependencies]

@@ -22,6 +22,7 @@ axum = { version = "0.8.1", features = [
   "ws",
 ] }
 axum-extra = { version = "0.10.0", features = ["cookie"] }
+futures = "0.3.31"
 jsonwebtoken = "9.3.0"
 reqwest = { version = "0.12.12", features = ["json"] }
 serde = { version = "1.0.217", features = ["derive"] }
