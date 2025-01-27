@@ -1224,6 +1224,19 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a7a70ba024b9dc04c27ea2f0c0548feb474ec5c54bba33a7f72f873a39d07b24"
 
 [[package]]
+name = "matchar_app_actor"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "postbox",
+ "refinement",
+ "serde",
+ "time",
+ "tunnel",
+ "url",
+]
+
+[[package]]
 name = "matchar_app_backend"
 version = "0.1.0"
 dependencies = [
@@ -1233,6 +1246,7 @@ dependencies = [
  "database",
  "futures",
  "jsonwebtoken",
+ "matchar_app_actor",
  "matchar_app_repository",
  "matchar_app_service",
  "postbox",

@@ -11,6 +11,7 @@ axum-extra = { workspace = true }
 database = { path = "../database" }
 futures = { workspace = true }
 jsonwebtoken = { workspace = true }
+matchar_app_actor = { path = "../matchar_app_actor" }
 matchar_app_repository = { path = "../matchar_app_repository" }
 matchar_app_service = { path = "../matchar_app_service" }
 postbox = { path = "../postbox" }

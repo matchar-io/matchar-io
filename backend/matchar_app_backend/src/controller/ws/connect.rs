@@ -11,7 +11,7 @@ use futures::{
     stream::{SplitSink, SplitStream},
     SinkExt, StreamExt,
 };
-use matchar_app_service::user::domain::UserActor;
+use matchar_app_actor::user::UserActor;
 use postbox::PostOffice;
 use tunnel::{Message, Receiver};
 

@@ -1,0 +1,13 @@
+[package]
+name = "matchar_app_actor"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = { workspace = true }
+postbox = { path = "../postbox" }
+refinement = { path = "../refinement" }
+serde = { workspace = true }
+time = { workspace = true }
+tunnel = { path = "../tunnel" }
+url = { workspace = true }
