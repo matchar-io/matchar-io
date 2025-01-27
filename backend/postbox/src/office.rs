@@ -25,11 +25,11 @@ impl PostOffice {
     }
 
     #[inline]
-    pub fn find<A>(&self, id: uuid::Uuid) -> Option<Postbox<A>>
+    pub fn find<A>(&self, id: impl Into<uuid::Uuid>) -> Option<Postbox<A>>
     where
         A: Actor,
     {
-        self.registry.get(id)
+        self.registry.get(id.into())
     }
 
     pub fn broadcast<A>(&self) -> Broadcast<impl Iterator<Item = Postbox<A>> + '_>

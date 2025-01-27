@@ -1,26 +1,37 @@
 use crate::channel::ChannelCommand;
-use postbox::{Message, PostboxError};
-use refinement::UserId;
+use postbox::{Message, PostOffice, PostboxError};
+use refinement::{ChannelId, UserId};
 
-#[derive(Clone)]
-pub struct EnterCommand {
+#[derive(Clone, Deserialize)]
+pub struct EnterMessage {
+    pub(crate) channel_id: ChannelId,
     pub(crate) user_id: UserId,
 }
 
-#[derive(Clone)]
-pub enum EnterCommandError {
+#[derive(Debug, Clone, Error)]
+pub enum EnterMessageError {
+    #[error("Postbox error")]
     Postbox(PostboxError),
+    #[error("Channel not found")]
+    ChannelNotFound,
+    #[error("User not found")]
     UserNotFound,
 }
 
-impl ChannelCommand {
-    pub async fn enter(&self, user_id: UserId) -> <EnterCommand as Message>::Executed {
-        self.ask(EnterCommand { user_id })
+impl EnterMessage {
+    pub async fn tell(self, office: PostOffice) -> Result<(), EnterMessageError> {
+        let Some(channel) = office.find(self.channel_id).map(ChannelCommand::new) else {
+            return Err(EnterMessageError::ChannelNotFound);
+        };
+        channel
+            .ask(self)
             .await
-            .unwrap_or_else(|error| Err(EnterCommandError::Postbox(error)))
+            .unwrap_or_else(|error| Err(EnterMessageError::Postbox(error)))?;
+
+        Ok(())
     }
 }
 
-impl Message for EnterCommand {
-    type Executed = Result<(), EnterCommandError>;
+impl Message for EnterMessage {
+    type Executed = Result<(), EnterMessageError>;
 }

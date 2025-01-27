@@ -1,20 +1,20 @@
-use super::{EnterCommand, EnterCommandError};
+use super::{EnterMessage, EnterMessageError};
 use crate::channel::ChannelActor;
 use postbox::{Context, Handler, Message};
 
 #[postbox::async_trait]
-impl Handler<EnterCommand> for ChannelActor {
-    type Executed = <EnterCommand as Message>::Executed;
+impl Handler<EnterMessage> for ChannelActor {
+    type Executed = <EnterMessage as Message>::Executed;
 
     async fn on_execute(
         &mut self,
-        EnterCommand { user_id }: EnterCommand,
+        EnterMessage { user_id, .. }: EnterMessage,
         context: &mut Context<Self>,
     ) -> Self::Executed {
         let user = context
             .registry
             .get(user_id.as_uuid())
-            .ok_or(EnterCommandError::UserNotFound)?;
+            .ok_or(EnterMessageError::UserNotFound)?;
         self.all_users.insert(user.clone());
         self.lobby_users.insert(user);
 

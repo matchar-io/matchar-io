@@ -1,26 +1,35 @@
 use crate::room::RoomCommand;
-use postbox::{Message, PostboxError};
-use refinement::UserId;
+use postbox::{Message, PostOffice, PostboxError};
+use refinement::{RoomId, UserId};
 
-#[derive(Clone)]
-pub struct EnterCommand {
+#[derive(Clone, Deserialize)]
+pub struct EnterMessage {
+    pub(crate) room_id: RoomId,
     pub(crate) user_id: UserId,
 }
 
-#[derive(Clone)]
-pub enum EnterError {
+#[derive(Debug, Clone, Error)]
+pub enum EnterMessageError {
+    #[error("Postbox error")]
     Postbox(PostboxError),
+    #[error("Room not found")]
+    RoomNotFound,
+    #[error("User not found")]
     UserNotFound,
 }
 
-impl RoomCommand {
-    pub async fn enter(&self, user_id: UserId) -> <EnterCommand as Message>::Executed {
-        self.ask(EnterCommand { user_id })
+impl EnterMessage {
+    pub async fn tell(self, office: PostOffice) -> Result<(), EnterMessageError> {
+        let room = office
+            .find(self.room_id)
+            .map(RoomCommand::new)
+            .ok_or(EnterMessageError::RoomNotFound)?;
+        room.ask(self)
             .await
-            .unwrap_or_else(|error| Err(EnterError::Postbox(error)))
+            .unwrap_or_else(|error| Err(EnterMessageError::Postbox(error)))
     }
 }
 
-impl Message for EnterCommand {
-    type Executed = Result<(), EnterError>;
+impl Message for EnterMessage {
+    type Executed = Result<(), EnterMessageError>;
 }

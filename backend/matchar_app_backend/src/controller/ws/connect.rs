@@ -26,11 +26,11 @@ pub async fn handler(
         let (client_emitter, client_receiver) = socket.split();
         let (tunnel_emitter, tunnel_receiver) = tunnel::channel(20);
 
-        let user = UserActor::new(user_id, tunnel_emitter.clone());
+        let user = UserActor::new(user_id, tunnel_emitter);
         let user = office.spawn(user_id.as_uuid(), user);
 
         tokio::spawn(to_client(tunnel_receiver, client_emitter, office.clone()));
-        tokio::spawn(from_client(client_receiver, tunnel_emitter, office));
+        tokio::spawn(from_client(client_receiver, office));
     })
 }
 
@@ -52,15 +52,15 @@ async fn to_client(
     }
 }
 
-async fn from_client(
-    mut receiver: SplitStream<WebSocket>,
-    mut emitter: tunnel::Emitter,
-    _office: PostOffice,
-) {
+async fn from_client(mut receiver: SplitStream<WebSocket>, office: PostOffice) {
     while let Some(message) = receiver.next().await {
         match message {
-            Ok(AxumMessage::Text(_text)) => {
-                // TODO: Implement
+            Ok(AxumMessage::Text(text)) => {
+                use matchar_app_actor::Message;
+
+                if let Ok(message) = text.parse::<Message>() {
+                    message.tell(office.clone()).await;
+                }
             }
             Ok(AxumMessage::Close(_)) => break,
             _ => {

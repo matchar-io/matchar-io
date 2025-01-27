@@ -1231,6 +1231,8 @@ dependencies = [
  "postbox",
  "refinement",
  "serde",
+ "serde_json",
+ "thiserror 2.0.11",
  "time",
  "tunnel",
  "url",
