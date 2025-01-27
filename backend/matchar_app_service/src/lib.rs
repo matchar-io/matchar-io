@@ -11,6 +11,7 @@ pub mod channel;
 pub mod game;
 pub mod me;
 pub mod room;
+pub mod session;
 pub mod user;
 
 mod common;

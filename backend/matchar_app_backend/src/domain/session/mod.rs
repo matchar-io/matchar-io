@@ -9,7 +9,11 @@ use axum::{
 use axum_extra::extract::Cached;
 use refinement::SessionId;
 
-pub struct Session {
+#[derive(Debug, Clone, Copy)]
+pub struct Session(pub InnerSession);
+
+#[derive(Debug, Clone, Copy)]
+pub struct InnerSession {
     session_id: SessionId,
 }
 
@@ -17,8 +21,8 @@ pub enum SessionError {
     SessionToken(ReceivedSessionTokenError),
 }
 
-impl Session {
-    pub const fn session_id(&self) -> SessionId {
+impl InnerSession {
+    pub const fn session_id(self) -> SessionId {
         self.session_id
     }
 }
@@ -30,12 +34,12 @@ where
     type Rejection = SessionError;
 
     async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
-        let session_token = Cached::<ReceivedSessionToken>::from_request_parts(parts, state)
+        let Cached(ReceivedSessionToken(session_token)) = Cached::from_request_parts(parts, state)
             .await
             .map_err(SessionError::SessionToken)?;
         let session_id = session_token.session_id();
 
-        Ok(Self { session_id })
+        Ok(Self(InnerSession { session_id }))
     }
 }
 

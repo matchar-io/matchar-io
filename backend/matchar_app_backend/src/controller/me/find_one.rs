@@ -22,7 +22,7 @@ pub enum ErrorKind {
 }
 
 pub async fn handler(
-    session: Session,
+    Session(session): Session,
     Extension(pool): Extension<ConnectionPool>,
 ) -> Result<Json<Response>, ErrorKind> {
     let now = time::OffsetDateTime::now_utc();
