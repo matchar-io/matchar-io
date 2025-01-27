@@ -1,9 +1,9 @@
 use super::{EnterCommand, EnterError};
-use crate::room::domain::Room;
+use crate::room::domain::RoomActor;
 use postbox::{Context, Handler, Message};
 
 #[postbox::async_trait]
-impl Handler<EnterCommand> for Room {
+impl Handler<EnterCommand> for RoomActor {
     type Executed = <EnterCommand as Message>::Executed;
 
     async fn on_execute(

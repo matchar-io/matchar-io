@@ -1,5 +1,5 @@
 use super::RoomCountUpdatedEvent;
-use crate::{channel::domain::Channel, user::emit_event::Event};
+use crate::{channel::domain::ChannelActor, user::emit_event::Event};
 use postbox::{Context, Handler, Message};
 use refinement::RoomId;
 
@@ -31,7 +31,7 @@ impl From<RoomCountUpdatedEvent> for Payload {
 }
 
 #[postbox::async_trait]
-impl Handler<RoomCountUpdatedEvent> for Channel {
+impl Handler<RoomCountUpdatedEvent> for ChannelActor {
     type Executed = <RoomCountUpdatedEvent as Message>::Executed;
 
     async fn on_execute(

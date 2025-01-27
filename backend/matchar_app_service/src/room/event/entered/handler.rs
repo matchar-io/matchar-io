@@ -1,5 +1,5 @@
 use super::EnteredEvent;
-use crate::{room::domain::Room, user::emit_event::Event};
+use crate::{room::domain::RoomActor, user::emit_event::Event};
 use postbox::{Context, Handler, Message};
 use refinement::{RoomId, UserId, UserName};
 
@@ -33,7 +33,7 @@ impl From<EnteredEvent> for Payload {
 }
 
 #[postbox::async_trait]
-impl Handler<EnteredEvent> for Room {
+impl Handler<EnteredEvent> for RoomActor {
     type Executed = <EnteredEvent as Message>::Executed;
 
     async fn on_execute(&mut self, event: EnteredEvent, _: &mut Context<Self>) -> Self::Executed {

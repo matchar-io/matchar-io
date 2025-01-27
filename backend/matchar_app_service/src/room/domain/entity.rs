@@ -1,19 +1,19 @@
 use crate::{
     common::postbox::Pool,
     game::domain::config::GameConfig,
-    user::domain::{User, UserPostbox},
+    user::domain::{UserActor, UserPostbox},
 };
 use postbox::Actor;
 use refinement::{RoomId, UserId};
 
-pub type RoomPostbox = crate::common::postbox::Postbox<Room>;
+pub type RoomPostbox = crate::common::postbox::Postbox<RoomActor>;
 
-pub type RoomCommand = crate::common::postbox::Command<Room>;
+pub type RoomCommand = crate::common::postbox::Command<RoomActor>;
 
-pub type RoomEvent = crate::common::postbox::Event<Room>;
+pub type RoomEvent = crate::common::postbox::Event<RoomActor>;
 
 /// 방
-pub struct Room {
+pub struct RoomActor {
     /// 방 ID
     pub(crate) room_id: RoomId,
     /// 방 이름
@@ -25,12 +25,12 @@ pub struct Room {
     /// 방장 ID
     pub(crate) host_id: UserId,
     /// 플레이어 목록
-    pub(crate) players: Pool<User>,
+    pub(crate) players: Pool<UserActor>,
     /// 게임 설정
     pub(crate) config: GameConfig,
 }
 
-impl Room {
+impl RoomActor {
     pub fn new(
         room_id: RoomId,
         name: String,
@@ -62,7 +62,7 @@ impl Room {
     }
 }
 
-impl Actor for Room {
+impl Actor for RoomActor {
     type Id = RoomId;
 
     #[inline]

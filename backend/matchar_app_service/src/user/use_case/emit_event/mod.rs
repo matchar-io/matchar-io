@@ -1,4 +1,4 @@
-use crate::user::domain::{User, UserEvent};
+use crate::user::domain::{UserActor, UserEvent};
 use postbox::{Context, Handler, Message, PostboxError, PostboxResult};
 
 pub trait Event: serde::Serialize + Clone + Sync + Send + 'static {
@@ -30,7 +30,7 @@ where
 }
 
 #[postbox::async_trait]
-impl<E> Handler<EmitEvent<E>> for User
+impl<E> Handler<EmitEvent<E>> for UserActor
 where
     E: Event,
 {
@@ -42,7 +42,7 @@ where
         _context: &mut Context<Self>,
     ) -> Self::Executed {
         self.emitter
-            .emit(E::TYPE, event)
+            .event(E::TYPE, event)
             .await
             .map_err(EmitEventError::Emitter)?;
 

@@ -2,6 +2,7 @@ use crate::{Actor, Broadcast, Postbox, Registry};
 use std::sync::Arc;
 use uuid::Uuid;
 
+#[derive(Clone)]
 pub struct PostOffice {
     registry: Arc<Registry>,
 }

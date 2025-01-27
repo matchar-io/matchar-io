@@ -1,26 +1,26 @@
-use crate::{common::postbox::Pool, room::domain::Room, user::domain::User};
+use crate::{common::postbox::Pool, room::domain::RoomActor, user::domain::UserActor};
 use postbox::Actor;
 use refinement::ChannelId;
 
-pub type ChannelPostbox = crate::common::postbox::Postbox<Channel>;
+pub type ChannelPostbox = crate::common::postbox::Postbox<ChannelActor>;
 
-pub type ChannelCommand = crate::common::postbox::Command<Channel>;
+pub type ChannelCommand = crate::common::postbox::Command<ChannelActor>;
 
-pub type ChannelEvent = crate::common::postbox::Event<Channel>;
+pub type ChannelEvent = crate::common::postbox::Event<ChannelActor>;
 
 /// 채널
-pub struct Channel {
+pub struct ChannelActor {
     /// 채널 ID
     pub(crate) channel_id: ChannelId,
     /// 방 목록
-    pub(crate) rooms: Pool<Room>,
+    pub(crate) rooms: Pool<RoomActor>,
     /// 모든 유저 목록
-    pub(crate) all_users: Pool<User>,
+    pub(crate) all_users: Pool<UserActor>,
     /// 로비에 있는 유저 목록
-    pub(crate) lobby_users: Pool<User>,
+    pub(crate) lobby_users: Pool<UserActor>,
 }
 
-impl Channel {
+impl ChannelActor {
     pub fn new(channel_id: ChannelId) -> Self {
         Self {
             channel_id,
@@ -32,7 +32,7 @@ impl Channel {
 }
 
 #[postbox::async_trait]
-impl Actor for Channel {
+impl Actor for ChannelActor {
     type Id = ChannelId;
 
     #[inline]

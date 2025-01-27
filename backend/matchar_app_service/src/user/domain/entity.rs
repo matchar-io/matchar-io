@@ -1,27 +1,27 @@
 use postbox::Actor;
 use refinement::UserId;
 
-pub type UserPostbox = crate::common::postbox::Postbox<User>;
+pub type UserPostbox = crate::common::postbox::Postbox<UserActor>;
 
-pub type UserCommand = crate::common::postbox::Command<User>;
+pub type UserCommand = crate::common::postbox::Command<UserActor>;
 
-pub type UserEvent = crate::common::postbox::Event<User>;
+pub type UserEvent = crate::common::postbox::Event<UserActor>;
 
 /// 유저
-pub struct User {
+pub struct UserActor {
     /// 유저 ID
     pub(crate) user_id: UserId,
     /// 이벤트 발행자
     pub(crate) emitter: tunnel::Emitter,
 }
 
-impl User {
+impl UserActor {
     pub fn new(user_id: UserId, emitter: tunnel::Emitter) -> Self {
         Self { user_id, emitter }
     }
 }
 
-impl Actor for User {
+impl Actor for UserActor {
     type Id = UserId;
 
     #[inline]

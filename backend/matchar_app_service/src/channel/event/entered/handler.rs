@@ -1,5 +1,5 @@
 use super::EnteredEvent;
-use crate::{channel::domain::Channel, user::emit_event::Event};
+use crate::{channel::domain::ChannelActor, user::emit_event::Event};
 use postbox::{Context, Handler, Message};
 use refinement::ChannelId;
 
@@ -14,7 +14,7 @@ impl Event for Payload {
 }
 
 #[postbox::async_trait]
-impl Handler<EnteredEvent> for Channel {
+impl Handler<EnteredEvent> for ChannelActor {
     type Executed = <EnteredEvent as Message>::Executed;
 
     async fn on_execute(&mut self, event: EnteredEvent, _: &mut Context<Self>) -> Self::Executed {

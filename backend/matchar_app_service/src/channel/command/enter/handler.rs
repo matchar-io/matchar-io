@@ -1,9 +1,9 @@
 use super::{EnterCommand, EnterCommandError};
-use crate::channel::domain::Channel;
+use crate::channel::domain::ChannelActor;
 use postbox::{Context, Handler, Message};
 
 #[postbox::async_trait]
-impl Handler<EnterCommand> for Channel {
+impl Handler<EnterCommand> for ChannelActor {
     type Executed = <EnterCommand as Message>::Executed;
 
     async fn on_execute(

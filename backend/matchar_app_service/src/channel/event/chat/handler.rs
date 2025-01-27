@@ -1,5 +1,5 @@
 use super::ChatEvent;
-use crate::{channel::domain::Channel, user::emit_event::Event};
+use crate::{channel::domain::ChannelActor, user::emit_event::Event};
 use postbox::{Context, Handler, Message};
 use refinement::{UserId, UserName};
 
@@ -20,7 +20,7 @@ impl Event for Payload {
 }
 
 #[postbox::async_trait]
-impl Handler<ChatEvent> for Channel {
+impl Handler<ChatEvent> for ChannelActor {
     type Executed = <ChatEvent as Message>::Executed;
 
     async fn on_execute(&mut self, event: ChatEvent, _: &mut Context<Self>) -> Self::Executed {
