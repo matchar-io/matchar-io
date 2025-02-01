@@ -1,4 +1,4 @@
-use super::{FromRequestParts, Parts};
+use super::{FromRequest, Request};
 use crate::Extension;
 
 #[derive(Clone)]
@@ -7,18 +7,18 @@ pub struct Cached<T>(pub T);
 #[derive(Clone)]
 struct CachedEntry<T>(T);
 
-impl<T> FromRequestParts for Cached<T>
+impl<T> FromRequest for Cached<T>
 where
-    T: FromRequestParts + Clone + Sync + Send + 'static,
+    T: FromRequest + Clone + Sync + Send + 'static,
 {
     type Rejection = T::Rejection;
 
-    async fn from_request_parts(parts: &mut Parts) -> Result<Self, Self::Rejection> {
-        match Extension::<CachedEntry<T>>::from_request_parts(parts).await {
+    async fn from_request(request: &mut Request) -> Result<Self, Self::Rejection> {
+        match Extension::<CachedEntry<T>>::from_request(request).await {
             Ok(Extension(CachedEntry(value))) => Ok(Self(value)),
             Err(_) => {
-                let value = T::from_request_parts(parts).await?;
-                parts
+                let value = T::from_request(request).await?;
+                request
                     .extensions
                     .insert(Extension(CachedEntry(value.clone())));
 

@@ -10,8 +10,8 @@ use serde_json::Value;
 use std::collections::HashMap;
 
 pub struct Router {
-    extensions: Extensions,
     routes: HashMap<&'static str, BoxedHandler>,
+    extensions: Extensions,
 }
 
 impl Router {
@@ -37,11 +37,11 @@ impl Router {
         self
     }
 
-    pub async fn execute(&self, path: &str, body: Value) -> Option<Response> {
+    pub async fn execute(&self, path: &str, value: Value) -> Option<Response> {
         let handler = self.routes.get(path)?;
 
         let extensions = self.extensions.clone_all();
-        let request = Request::new(body, extensions);
+        let request = Request::new(value, extensions);
 
         Some(handler(request).await)
     }

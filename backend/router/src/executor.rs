@@ -17,8 +17,8 @@ impl Executor {
         Self { router }
     }
 
-    pub async fn execute(&self, path: &str, body: Value) -> Response {
-        match self.router.execute(path, body).await {
+    pub async fn execute(&self, path: &str, value: Value) -> Response {
+        match self.router.execute(path, value).await {
             Some(response) => response,
             None => Error::NotFound.into_response(),
         }

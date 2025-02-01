@@ -1,4 +1,4 @@
-use crate::{FromRequestParts, Parts};
+use crate::{FromRequest, Request};
 use std::{
     any::{Any, TypeId},
     collections::HashMap,
@@ -61,14 +61,14 @@ impl Extensions {
     }
 }
 
-impl<T> FromRequestParts for Extension<T>
+impl<T> FromRequest for Extension<T>
 where
     T: Clone + 'static,
 {
     type Rejection = ();
 
-    async fn from_request_parts(parts: &mut Parts) -> Result<Self, ()> {
-        let ExtensionEntry(extension) = parts.extensions.map.get(&TypeId::of::<T>()).ok_or(())?;
+    async fn from_request(request: &mut Request) -> Result<Self, ()> {
+        let ExtensionEntry(extension) = request.extensions.map.get(&TypeId::of::<T>()).ok_or(())?;
         let extension = extension.clone_box().into_any();
         let extension: Box<AnyCloneExtension<T>> = extension.downcast().or_else(|_| Err(()))?;
 
