@@ -4,7 +4,7 @@ use std::{
     collections::HashMap,
 };
 
-type DynamicExtension = Box<dyn AnyClone + Send + 'static>;
+type DynamicExtension = Box<dyn AnyClone + Send>;
 
 trait AnyClone: Any {
     fn clone_box(&self) -> DynamicExtension;
@@ -12,7 +12,7 @@ trait AnyClone: Any {
     fn into_any(self: Box<Self>) -> Box<dyn Any>;
 }
 
-pub(crate) struct Extensions {
+pub struct Extensions {
     map: HashMap<TypeId, ExtensionEntry<DynamicExtension>>,
 }
 
@@ -29,9 +29,10 @@ where
     T: Clone + Send + 'static,
 {
     fn clone_box(&self) -> DynamicExtension {
-        Box::new(AnyCloneExtension(self.0.clone()))
+        Box::new(self.clone())
     }
 
+    #[inline]
     fn into_any(self: Box<Self>) -> Box<dyn Any> {
         self
     }
@@ -45,10 +46,9 @@ impl Extensions {
     }
 
     pub(crate) fn insert<T: Clone + Send + 'static>(&mut self, Extension(extension): Extension<T>) {
-        self.map.insert(
-            TypeId::of::<T>(),
-            ExtensionEntry(Box::new(AnyCloneExtension(extension))),
-        );
+        let type_id = TypeId::of::<T>();
+        let extension = Box::new(AnyCloneExtension(extension));
+        self.map.insert(type_id, ExtensionEntry(extension));
     }
 
     pub(crate) fn clone_all(&self) -> Self {
@@ -70,10 +70,7 @@ where
     async fn from_request_parts(parts: &mut Parts) -> Result<Self, ()> {
         let ExtensionEntry(extension) = parts.extensions.map.get(&TypeId::of::<T>()).ok_or(())?;
         let extension = extension.clone_box().into_any();
-        let extension = extension
-            .downcast::<AnyCloneExtension<T>>()
-            .ok()
-            .ok_or(())?;
+        let extension: Box<AnyCloneExtension<T>> = extension.downcast().or_else(|_| Err(()))?;
 
         Ok(Extension(extension.0))
     }

@@ -6,7 +6,7 @@ pub use body::*;
 pub use cache::*;
 pub use part::*;
 
-use crate::IntoResponse;
+use crate::{Extensions, IntoResponse};
 use serde_json::Value;
 use std::future::Future;
 
@@ -23,9 +23,10 @@ pub struct Request {
 }
 
 impl Request {
-    pub fn new(body: Value) -> Self {
+    #[inline]
+    pub const fn new(body: Value, extensions: Extensions) -> Self {
         Self {
-            parts: Parts::new(),
+            parts: Parts::new(extensions),
             body,
         }
     }

@@ -14,9 +14,8 @@ pub struct Parts {
 }
 
 impl Parts {
-    pub(crate) fn new() -> Self {
-        Self {
-            extensions: Extensions::new(),
-        }
+    #[inline]
+    pub(crate) const fn new(extensions: Extensions) -> Self {
+        Self { extensions }
     }
 }

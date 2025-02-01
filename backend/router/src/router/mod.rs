@@ -6,6 +6,7 @@ use crate::{
     handler::{BoxedHandler, Handler},
     Request, Response,
 };
+use serde_json::Value;
 use std::collections::HashMap;
 
 pub struct Router {
@@ -36,9 +37,11 @@ impl Router {
         self
     }
 
-    pub async fn execute(&self, path: &str, mut request: Request) -> Option<Response> {
+    pub async fn execute(&self, path: &str, body: Value) -> Option<Response> {
         let handler = self.routes.get(path)?;
-        request.parts.extensions = self.extensions.clone_all();
+
+        let extensions = self.extensions.clone_all();
+        let request = Request::new(body, extensions);
 
         Some(handler(request).await)
     }

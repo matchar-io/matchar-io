@@ -7,7 +7,7 @@ pub struct Body<T>(pub T);
 
 #[derive(Debug, Error)]
 pub enum BodyError {
-    #[error("Failed to deserialize body, {0}")]
+    #[error("Failed to deserialize body: {0}")]
     Deserialize(serde_json::Error),
 }
 
