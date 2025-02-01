@@ -1,14 +1,10 @@
 pub mod body;
 pub mod cache;
-pub mod parameter;
 pub mod part;
-pub mod path;
 
 pub use body::*;
 pub use cache::*;
-pub use parameter::*;
 pub use part::*;
-pub use path::*;
 
 use crate::IntoResponse;
 use serde_json::Value;
@@ -27,9 +23,9 @@ pub struct Request {
 }
 
 impl Request {
-    pub fn new(parameters: Parameters, body: Value) -> Self {
+    pub fn new(body: Value) -> Self {
         Self {
-            parts: Parts::new(parameters),
+            parts: Parts::new(),
             body,
         }
     }

@@ -7,23 +7,8 @@ pub trait Handler<T>: Clone + Sized + Sync + Send + 'static {
     fn call(self, request: Request) -> Self::Future;
 }
 
-type BoxedHandler = Box<dyn Fn(Request) -> Pin<Box<dyn Future<Output = Response> + Send>> + Send>;
-
-pub struct EventHandler {
-    pub handler: BoxedHandler,
-}
-
-impl EventHandler {
-    pub fn new<T>(handler: impl Handler<T>) -> Self {
-        Self {
-            handler: Box::new(move |request| Box::pin(handler.clone().call(request))),
-        }
-    }
-
-    pub async fn call(&self, request: Request) -> Response {
-        (self.handler)(request).await
-    }
-}
+pub type BoxedHandler =
+    Box<dyn Fn(Request) -> Pin<Box<dyn Future<Output = Response> + Send>> + Send>;
 
 impl<F, Fut, Res> Handler<()> for F
 where

@@ -13,42 +13,31 @@ pub enum Error {
     Deserialize(#[from] serde_json::Error),
 }
 
-#[derive(Deserialize)]
-struct Event {
-    #[serde(rename = "type")]
-    path: String,
-    #[serde(rename = "payload")]
-    body: Value,
-}
-
 impl Executor {
     pub const fn new(router: Router) -> Self {
         Self { router }
     }
 
     pub async fn from_str(&self, source: &str) -> Response {
-        match source.parse() {
-            Ok(Event { path, body }) => self.execute(&path, body).await,
-            Err(error) => error.into_response(),
+        #[derive(Deserialize)]
+        struct Data {
+            #[serde(rename = "type")]
+            path: String,
+            #[serde(rename = "payload")]
+            body: Value,
+        }
+
+        match serde_json::from_str(source) {
+            Ok(Data { path, body }) => self.execute(&path, body).await,
+            Err(error) => Error::Deserialize(error).into_response(),
         }
     }
 
     pub async fn execute(&self, path: &str, body: Value) -> Response {
-        match self.router.router.at(path) {
-            Ok(matchit::Match {
-                params,
-                value: handler,
-            }) => handler.call(Request::new(params.into(), body)).await,
-            Err(_) => Response::error(Error::NotFound),
+        match self.router.execute(path, Request::new(body)).await {
+            Some(response) => response,
+            None => Error::NotFound.into_response(),
         }
-    }
-}
-
-impl std::str::FromStr for Event {
-    type Err = Error;
-
-    fn from_str(source: &str) -> Result<Self, Self::Err> {
-        serde_json::from_str(source).map_err(Error::Deserialize)
     }
 }
 

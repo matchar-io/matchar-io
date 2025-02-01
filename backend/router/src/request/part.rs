@@ -1,4 +1,4 @@
-use crate::{Extensions, IntoResponse, Parameters};
+use crate::{Extensions, IntoResponse};
 use std::future::Future;
 
 pub trait FromRequestParts: Sized {
@@ -10,14 +10,12 @@ pub trait FromRequestParts: Sized {
 }
 
 pub struct Parts {
-    pub(crate) parameters: Parameters,
     pub(crate) extensions: Extensions,
 }
 
 impl Parts {
-    pub(crate) fn new(parameters: Parameters) -> Self {
+    pub(crate) fn new() -> Self {
         Self {
-            parameters,
             extensions: Extensions::new(),
         }
     }

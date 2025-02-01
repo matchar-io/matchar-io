@@ -2,34 +2,44 @@ pub mod extension;
 
 pub use extension::*;
 
-use crate::handler::{EventHandler, Handler};
+use crate::{
+    handler::{BoxedHandler, Handler},
+    Request, Response,
+};
+use std::collections::HashMap;
 
 pub struct Router {
-    pub(crate) router: matchit::Router<EventHandler>,
-    pub(crate) extensions: Extensions,
+    extensions: Extensions,
+    routes: HashMap<&'static str, BoxedHandler>,
 }
 
 impl Router {
     pub fn new() -> Self {
         Self {
-            router: matchit::Router::new(),
+            routes: HashMap::new(),
             extensions: Extensions::new(),
         }
     }
 
-    pub fn on<T>(
-        mut self,
-        path: &str,
-        handler: impl Handler<T>,
-    ) -> Result<Self, matchit::InsertError> {
-        self.router.insert(path, EventHandler::new(handler))?;
+    pub fn on<T>(mut self, path: &'static str, handler: impl Handler<T>) -> Self {
+        self.routes.insert(
+            path,
+            Box::new(move |request| Box::pin(handler.clone().call(request))),
+        );
 
-        Ok(self)
+        self
     }
 
-    pub fn extension<T: Sync + Send + 'static>(mut self, extension: Extension<T>) -> Self {
+    pub fn extension<T: Clone + Send + 'static>(mut self, extension: Extension<T>) -> Self {
         self.extensions.insert(extension);
 
         self
+    }
+
+    pub async fn execute(&self, path: &str, mut request: Request) -> Option<Response> {
+        let handler = self.routes.get(path)?;
+        request.parts.extensions = self.extensions.clone_all();
+
+        Some(handler(request).await)
     }
 }

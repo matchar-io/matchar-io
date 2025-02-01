@@ -18,7 +18,9 @@ where
             Ok(Extension(CachedEntry(value))) => Ok(Self(value)),
             Err(_) => {
                 let value = T::from_request_parts(parts).await?;
-                parts.extensions.insert(CachedEntry(value.clone()));
+                parts
+                    .extensions
+                    .insert(Extension(CachedEntry(value.clone())));
 
                 Ok(Self(value))
             }
