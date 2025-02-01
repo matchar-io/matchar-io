@@ -9,6 +9,7 @@ members = [
   "backend/oauth2",
   "backend/postbox",
   "backend/refinement",
+  "backend/router",
   "backend/tunnel",
 ]
 

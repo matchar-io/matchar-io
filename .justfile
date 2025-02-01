@@ -12,3 +12,6 @@ run environment package:
 
 test environment *package:
   dotenvx run -f .env.{{environment}} -- cargo test {{package}}
+
+doc environment:
+  dotenvx run -f .env.{{environment}} -- cargo doc
